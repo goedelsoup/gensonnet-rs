@@ -1,0 +1,29 @@
+version: "1.0"
+
+sources:
+  - type: openapi
+    name: "user-management-api"
+    git:
+      url: "https://github.com/example/user-management-api.git"
+      ref: "main"
+    include_patterns:
+      - "**/*.yaml"
+      - "**/*.yml"
+      - "**/*.json"
+    exclude_patterns:
+      - "**/*_test.yaml"
+      - "vendor/**"
+      - "**/generated/**"
+    output_path: "./generated/openapi"
+    openapi_version: "3.0"
+    include_examples: true
+    include_descriptions: true
+    base_url: "https://api.example.com/v1"
+
+output:
+  base_path: "./generated"
+  organization: "flat"
+
+generation:
+  fail_fast: false
+  deep_merge_strategy: "default"

@@ -1,0 +1,31 @@
+version: "1.0"
+sources:
+  - type: crd
+    name: "test-crd"
+    git:
+      url: "https://github.com/test/repo.git"
+      ref: "main"
+    filters:
+      - "test.com/v1"
+    output_path: "./test-output"
+
+output:
+  base_path: "./generated"
+  organization: "api_version"
+
+generation:
+  fail_fast: false
+  deep_merge_strategy: "default"
+
+plugins:
+  plugin_directories:
+    - "./plugins"
+  enable_external_discovery: true
+  cache_directory: "~/.cache/gensonnet/plugins"
+  validation:
+    validate_signatures: false
+    check_compatibility: true
+    allowed_sources:
+      - "local"
+      - "registry"
+    blocked_sources: []

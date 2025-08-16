@@ -1,0 +1,413 @@
+openapi: 3.0.0
+info:
+  title: User Management API
+  version: 1.0.0
+  description: API for managing users in the system
+  contact:
+    name: API Support
+    email: support@example.com
+    url: https://example.com/support
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production server
+  - url: https://staging-api.example.com/v1
+    description: Staging server
+
+paths:
+  /users:
+    get:
+      summary: Get all users
+      description: Retrieve a list of all users in the system
+      tags:
+        - users
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of users per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  total:
+                    type: integer
+                    description: Total number of users
+                  page:
+                    type: integer
+                    description: Current page number
+                  limit:
+                    type: integer
+                    description: Number of users per page
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new user
+      description: Create a new user in the system
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/{userId}:
+    get:
+      summary: Get user by ID
+      description: Retrieve a specific user by their ID
+      tags:
+        - users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The ID of the user to retrieve
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Update user
+      description: Update an existing user's information
+      tags:
+        - users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The ID of the user to update
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete user
+      description: Delete a user from the system
+      tags:
+        - users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The ID of the user to delete
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: User deleted successfully
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    User:
+      type: object
+      description: A user in the system
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the user
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        username:
+          type: string
+          description: Unique username for the user
+          minLength: 3
+          maxLength: 50
+          pattern: '^[a-zA-Z0-9_-]+$'
+          example: "john_doe"
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: "john.doe@example.com"
+        firstName:
+          type: string
+          description: User's first name
+          minLength: 1
+          maxLength: 100
+          example: "John"
+        lastName:
+          type: string
+          description: User's last name
+          minLength: 1
+          maxLength: 100
+          example: "Doe"
+        age:
+          type: integer
+          description: User's age
+          minimum: 0
+          maximum: 150
+          example: 30
+        isActive:
+          type: boolean
+          description: Whether the user account is active
+          default: true
+          example: true
+        roles:
+          type: array
+          description: List of roles assigned to the user
+          items:
+            type: string
+            enum: [admin, user, moderator]
+          example: ["user"]
+        metadata:
+          type: object
+          description: Additional metadata for the user
+          additionalProperties: true
+          example:
+            department: "Engineering"
+            location: "San Francisco"
+        createdAt:
+          type: string
+          format: date-time
+          description: When the user was created
+          example: "2023-01-15T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the user was last updated
+          example: "2023-01-15T10:30:00Z"
+      required:
+        - id
+        - username
+        - email
+        - firstName
+        - lastName
+
+    CreateUserRequest:
+      type: object
+      description: Request body for creating a new user
+      properties:
+        username:
+          type: string
+          description: Unique username for the user
+          minLength: 3
+          maxLength: 50
+          pattern: '^[a-zA-Z0-9_-]+$'
+          example: "john_doe"
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: "john.doe@example.com"
+        firstName:
+          type: string
+          description: User's first name
+          minLength: 1
+          maxLength: 100
+          example: "John"
+        lastName:
+          type: string
+          description: User's last name
+          minLength: 1
+          maxLength: 100
+          example: "Doe"
+        age:
+          type: integer
+          description: User's age
+          minimum: 0
+          maximum: 150
+          example: 30
+        roles:
+          type: array
+          description: List of roles to assign to the user
+          items:
+            type: string
+            enum: [admin, user, moderator]
+          default: ["user"]
+          example: ["user"]
+        metadata:
+          type: object
+          description: Additional metadata for the user
+          additionalProperties: true
+          example:
+            department: "Engineering"
+            location: "San Francisco"
+      required:
+        - username
+        - email
+        - firstName
+        - lastName
+
+    UpdateUserRequest:
+      type: object
+      description: Request body for updating a user
+      properties:
+        username:
+          type: string
+          description: Unique username for the user
+          minLength: 3
+          maxLength: 50
+          pattern: '^[a-zA-Z0-9_-]+$'
+          example: "john_doe"
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: "john.doe@example.com"
+        firstName:
+          type: string
+          description: User's first name
+          minLength: 1
+          maxLength: 100
+          example: "John"
+        lastName:
+          type: string
+          description: User's last name
+          minLength: 1
+          maxLength: 100
+          example: "Doe"
+        age:
+          type: integer
+          description: User's age
+          minimum: 0
+          maximum: 150
+          example: 30
+        isActive:
+          type: boolean
+          description: Whether the user account is active
+          example: true
+        roles:
+          type: array
+          description: List of roles to assign to the user
+          items:
+            type: string
+            enum: [admin, user, moderator]
+          example: ["user"]
+        metadata:
+          type: object
+          description: Additional metadata for the user
+          additionalProperties: true
+          example:
+            department: "Engineering"
+            location: "San Francisco"
+
+    Error:
+      type: object
+      description: Error response
+      properties:
+        code:
+          type: string
+          description: Error code
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          description: Error message
+          example: "Invalid input data"
+        details:
+          type: object
+          description: Additional error details
+          additionalProperties: true
+          example:
+            field: "email"
+            reason: "Invalid email format"
+        timestamp:
+          type: string
+          format: date-time
+          description: When the error occurred
+          example: "2023-01-15T10:30:00Z"
+      required:
+        - code
+        - message
+        - timestamp
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+
+security:
+  - bearerAuth: []

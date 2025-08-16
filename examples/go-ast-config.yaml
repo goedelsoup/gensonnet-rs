@@ -1,0 +1,26 @@
+version: "1.0"
+
+sources:
+  - type: go_ast
+    name: "sample-go-types"
+    git:
+      url: "https://github.com/example/sample-go-repo.git"
+      ref: "main"
+    include_patterns:
+      - "**/*.go"
+    exclude_patterns:
+      - "**/*_test.go"
+      - "vendor/**"
+      - "**/generated/**"
+    output_path: "./generated/go-ast"
+    package_filters:
+      - "main"
+      - "api"
+
+output:
+  base_path: "./generated"
+  organization: "flat"
+
+generation:
+  fail_fast: false
+  deep_merge_strategy: "default"

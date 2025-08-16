@@ -1,0 +1,215 @@
+name: "go-ast-test-suite"
+description: "Test suite for Go AST plugin"
+plugin_config:
+  plugin_id: "go-ast:builtin"
+  config:
+    parse_comments: true
+    extract_validation_tags: true
+  enabled_capabilities:
+    - Parse
+    - SchemaExtraction
+    - AstProcessing
+
+test_cases:
+  - name: "basic_struct_parsing"
+    description: "Test parsing of basic Go struct"
+    test_type: "SourceProcessing"
+    input:
+      files:
+        - "test.go"
+      content: |
+        package main
+        
+        // User represents a user in the system
+        type User struct {
+            ID   string `json:"id" validate:"required"`
+            Name string `json:"name" validate:"required"`
+            Age  int    `json:"age"`
+        }
+      config:
+        parse_comments: true
+      env_vars: {}
+    expected:
+      success: true
+      output_files: []
+      content_patterns: []
+      error_patterns: []
+      schemas:
+        schema_count: 1
+        schema_types:
+          - "go_struct"
+        schema_properties:
+          "User":
+            type: "object"
+            properties:
+              id:
+                type: "string"
+              name:
+                type: "string"
+              age:
+                type: "integer"
+    timeout_seconds: 30
+    required: true
+    tags:
+      - "basic"
+      - "struct"
+
+  - name: "interface_parsing"
+    description: "Test parsing of Go interface"
+    test_type: "SourceProcessing"
+    input:
+      files:
+        - "interface.go"
+      content: |
+        package main
+        
+        // UserService defines user operations
+        type UserService interface {
+            CreateUser(user *User) error
+            GetUser(id string) (*User, error)
+        }
+      config:
+        parse_comments: true
+      env_vars: {}
+    expected:
+      success: true
+      output_files: []
+      content_patterns: []
+      error_patterns: []
+      schemas:
+        schema_count: 1
+        schema_types:
+          - "go_interface"
+    timeout_seconds: 30
+    required: false
+    tags:
+      - "interface"
+
+  - name: "validation_tag_extraction"
+    description: "Test extraction of validation tags"
+    test_type: "SchemaExtraction"
+    input:
+      files:
+        - "validation.go"
+      content: |
+        package main
+        
+        type ValidatedStruct struct {
+            Required string `json:"required" validate:"required"`
+            MinLen   string `json:"min_len" validate:"min=5"`
+            MaxLen   string `json:"max_len" validate:"max=100"`
+            Email    string `json:"email" validate:"email"`
+            Age      int    `json:"age" validate:"min=0,max=150"`
+        }
+      config:
+        extract_validation_tags: true
+      env_vars: {}
+    expected:
+      success: true
+      output_files: []
+      content_patterns:
+        - "required"
+        - "min=5"
+        - "max=100"
+        - "email"
+      error_patterns: []
+      schemas:
+        schema_count: 1
+        schema_types:
+          - "go_struct"
+    timeout_seconds: 30
+    required: true
+    tags:
+      - "validation"
+      - "tags"
+
+  - name: "error_handling_invalid_syntax"
+    description: "Test error handling for invalid Go syntax"
+    test_type: "ErrorHandling"
+    input:
+      files:
+        - "invalid.go"
+      content: |
+        package main
+        
+        type InvalidStruct {
+            // Missing struct keyword
+            Field string
+        }
+      config:
+        parse_comments: true
+      env_vars: {}
+    expected:
+      success: false
+      output_files: []
+      content_patterns: []
+      error_patterns:
+        - "syntax"
+        - "invalid"
+      schemas:
+        schema_count: 0
+    timeout_seconds: 30
+    required: true
+    tags:
+      - "error"
+      - "syntax"
+
+  - name: "performance_large_file"
+    description: "Test performance with large Go file"
+    test_type: "Performance"
+    input:
+      files:
+        - "large.go"
+      content: |
+        package main
+        
+        // Large struct with many fields
+        type LargeStruct struct {
+            Field1  string `json:"field1"`
+            Field2  int    `json:"field2"`
+            Field3  bool   `json:"field3"`
+            Field4  string `json:"field4"`
+            Field5  int    `json:"field5"`
+            Field6  bool   `json:"field6"`
+            Field7  string `json:"field7"`
+            Field8  int    `json:"field8"`
+            Field9  bool   `json:"field9"`
+            Field10 string `json:"field10"`
+        }
+      config:
+        parse_comments: true
+      env_vars: {}
+    expected:
+      success: true
+      output_files: []
+      content_patterns: []
+      error_patterns: []
+      performance:
+        max_processing_time_ms: 1000
+        max_memory_usage_bytes: 1048576
+        max_output_size_bytes: 10240
+      schemas:
+        schema_count: 1
+    timeout_seconds: 60
+    required: false
+    tags:
+      - "performance"
+      - "large"
+
+setup:
+  commands: []
+  files: {}
+  environment:
+    GOOS: "linux"
+    GOARCH: "amd64"
+
+cleanup:
+  commands: []
+  remove_files:
+    - "test.go"
+    - "interface.go"
+    - "validation.go"
+    - "invalid.go"
+    - "large.go"
+  remove_directories:
+    - "output"

@@ -1,0 +1,28 @@
+version: "1.0"
+sources:
+  - type: "crd"
+    name: "istio-crds"
+    git:
+      url: "https://github.com/istio/istio.git"
+      ref: "1.20.0"
+    filters:
+      - "networking.istio.io/*"
+      - "security.istio.io/*"
+    output_path: "./generated/istio"
+
+  - type: "crd"
+    name: "prometheus-operator"
+    git:
+      url: "https://github.com/prometheus-operator/kube-prometheus.git"
+      ref: "v0.13.0"
+    filters:
+      - "monitoring.coreos.com/*"
+    output_path: "./generated/prometheus"
+
+output:
+  base_path: "./generated"
+  organization: "api_version"
+
+generation:
+  fail_fast: false
+  deep_merge_strategy: "default"

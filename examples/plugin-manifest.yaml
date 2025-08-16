@@ -1,0 +1,37 @@
+metadata:
+  id: "custom-schema:example"
+  name: "Custom Schema Plugin"
+  version: "1.0.0"
+  description: "Example plugin for processing custom schema formats"
+  supported_types:
+    - "custom"
+    - "yaml"
+    - "json"
+  capabilities:
+    - "Parse"
+    - "SchemaExtraction"
+    - "Validation"
+
+config:
+  plugin_id: "custom-schema:example"
+  config:
+    schema_version: "v1"
+    output_format: "jsonnet"
+    validation_rules:
+      - "required_fields"
+      - "type_checking"
+  enabled_capabilities:
+    - "Parse"
+    - "SchemaExtraction"
+    - "Validation"
+
+dependencies:
+  - "base-schema:1.0"
+
+requirements:
+  min_tool_version: "0.1.0"
+  required_capabilities:
+    - "Parse"
+  required_dependencies:
+    - "serde"
+    - "serde_yaml"

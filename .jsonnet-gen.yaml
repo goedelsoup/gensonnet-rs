@@ -1,0 +1,16 @@
+version: '1.0'
+sources:
+- type: crd
+  name: example-crds
+  git:
+    url: https://github.com/example/k8s-manifests.git
+    ref: main
+  filters:
+  - example.com/v1
+  output_path: ./generated/example
+output:
+  base_path: ./generated
+  organization: api_version
+generation:
+  fail_fast: false
+  deep_merge_strategy: default
