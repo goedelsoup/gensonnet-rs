@@ -803,7 +803,6 @@ pub struct GenerationResult {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
 
     #[test]
     fn test_group_schemas_by_version() {

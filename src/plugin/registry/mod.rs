@@ -401,7 +401,10 @@ impl PluginDiscoveryService {
             }
         }
 
-        info!("Plugin discovery completed: {} loaded, {} errors", loaded_count, error_count);
+        info!(
+            "Plugin discovery completed: {} loaded, {} errors",
+            loaded_count, error_count
+        );
         Ok(())
     }
 

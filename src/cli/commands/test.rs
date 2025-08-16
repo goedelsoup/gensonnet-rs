@@ -1,7 +1,7 @@
 //! Plugin testing CLI commands
 
 use anyhow::Result;
-use clap::{Args, Subcommand, FromArgMatches};
+use clap::{Args, FromArgMatches, Subcommand};
 
 use crate::plugin::testing::*;
 
@@ -88,16 +88,16 @@ pub fn command() -> clap::Command {
         .about("Run plugin tests")
         .subcommand_negates_reqs(true)
         .subcommand(RunArgs::augment_args(
-            clap::Command::new("run").about("Run plugin tests")
+            clap::Command::new("run").about("Run plugin tests"),
         ))
         .subcommand(ListArgs::augment_args(
-            clap::Command::new("list").about("List available test suites")
+            clap::Command::new("list").about("List available test suites"),
         ))
         .subcommand(InfoArgs::augment_args(
-            clap::Command::new("info").about("Show test suite information")
+            clap::Command::new("info").about("Show test suite information"),
         ))
         .subcommand(ReportArgs::augment_args(
-            clap::Command::new("report").about("Generate test report")
+            clap::Command::new("report").about("Generate test report"),
         ))
 }
 
@@ -233,7 +233,10 @@ async fn show_test_suite_info(args: InfoArgs) -> Result<()> {
     println!("  Description: {}", test_suite.description);
     println!("  Test Cases: {}", test_suite.test_cases.len());
     println!("  Plugin ID: {}", test_suite.plugin_config.plugin_id);
-    println!("  Enabled Capabilities: {:?}", test_suite.plugin_config.enabled_capabilities);
+    println!(
+        "  Enabled Capabilities: {:?}",
+        test_suite.plugin_config.enabled_capabilities
+    );
     println!();
 
     if !test_suite.test_cases.is_empty() {
@@ -247,7 +250,16 @@ async fn show_test_suite_info(args: InfoArgs) -> Result<()> {
                 println!("       Tags: {}", test_case.tags.join(", "));
             }
             if !test_case.input.files.is_empty() {
-                println!("       Input Files: {}", test_case.input.files.iter().map(|p| p.display().to_string()).collect::<Vec<_>>().join(", "));
+                println!(
+                    "       Input Files: {}",
+                    test_case
+                        .input
+                        .files
+                        .iter()
+                        .map(|p| p.display().to_string())
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                );
             }
             println!();
         }
@@ -261,7 +273,8 @@ async fn generate_test_report(args: ReportArgs) -> Result<()> {
 
     // Load test results from file
     let content = tokio::fs::read_to_string(&args.results_file).await?;
-    let test_results: TestRunSummary = match args.results_file.extension().and_then(|s| s.to_str()) {
+    let test_results: TestRunSummary = match args.results_file.extension().and_then(|s| s.to_str())
+    {
         Some("json") => serde_json::from_str(&content)?,
         Some("yaml") | Some("yml") => serde_yaml::from_str(&content)?,
         _ => return Err(anyhow::anyhow!("Unsupported results file format")),
@@ -272,7 +285,12 @@ async fn generate_test_report(args: ReportArgs) -> Result<()> {
         "html" => generate_html_report(&test_results)?,
         "json" => serde_json::to_string_pretty(&test_results)?,
         "yaml" => serde_yaml::to_string(&test_results)?,
-        _ => return Err(anyhow::anyhow!("Unsupported report format: {}", args.format)),
+        _ => {
+            return Err(anyhow::anyhow!(
+                "Unsupported report format: {}",
+                args.format
+            ))
+        }
     };
 
     // Write report to output file or stdout
@@ -561,7 +579,12 @@ async fn discover_test_suite_files() -> Result<Vec<TestSuiteInfo>> {
     let mut suites = Vec::new();
 
     // Look for test suite files with common patterns
-    let patterns = vec!["**/*test*.yaml", "**/*test*.yml", "**/*suite*.yaml", "**/*suite*.yml"];
+    let patterns = vec![
+        "**/*test*.yaml",
+        "**/*test*.yml",
+        "**/*suite*.yaml",
+        "**/*suite*.yml",
+    ];
 
     for pattern in patterns {
         if let Ok(entries) = glob::glob(pattern) {
@@ -601,7 +624,9 @@ async fn discover_plugin_test_suites() -> Result<Vec<TestSuiteInfo>> {
                     if let Ok(entry) = entry {
                         let test_suite_path = entry.path().join("test-suite.yaml");
                         if test_suite_path.exists() {
-                            if let Ok(test_suite) = load_test_suite_from_file(&test_suite_path).await {
+                            if let Ok(test_suite) =
+                                load_test_suite_from_file(&test_suite_path).await
+                            {
                                 suites.push(TestSuiteInfo {
                                     name: test_suite.name.clone(),
                                     description: test_suite.description.clone(),
@@ -642,15 +667,21 @@ fn generate_html_report(summary: &TestRunSummary) -> Result<String> {
     html.push_str("</title>\n");
     html.push_str("    <style>\n");
     html.push_str("        body { font-family: Arial, sans-serif; margin: 20px; }\n");
-    html.push_str("        .header { background-color: #f0f0f0; padding: 20px; border-radius: 5px; }\n");
+    html.push_str(
+        "        .header { background-color: #f0f0f0; padding: 20px; border-radius: 5px; }\n",
+    );
     html.push_str("        .summary { margin: 20px 0; }\n");
     html.push_str("        .summary-item { display: inline-block; margin: 10px; padding: 10px; border-radius: 5px; }\n");
     html.push_str("        .passed { background-color: #d4edda; color: #155724; }\n");
     html.push_str("        .failed { background-color: #f8d7da; color: #721c24; }\n");
     html.push_str("        .total { background-color: #d1ecf1; color: #0c5460; }\n");
     html.push_str("        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }\n");
-    html.push_str("        .test-pass { background-color: #d4edda; border-left: 5px solid #28a745; }\n");
-    html.push_str("        .test-fail { background-color: #f8d7da; border-left: 5px solid #dc3545; }\n");
+    html.push_str(
+        "        .test-pass { background-color: #d4edda; border-left: 5px solid #28a745; }\n",
+    );
+    html.push_str(
+        "        .test-fail { background-color: #f8d7da; border-left: 5px solid #dc3545; }\n",
+    );
     html.push_str("        .error { color: #721c24; font-family: monospace; }\n");
     html.push_str("    </style>\n");
     html.push_str("</head>\n");
@@ -663,7 +694,11 @@ fn generate_html_report(summary: &TestRunSummary) -> Result<String> {
     html.push_str(&summary.test_suite_name);
     html.push_str("</h2>\n");
     html.push_str("        <p>Generated on: ");
-    html.push_str(&chrono::Utc::now().format("%Y-%m-%d %H:%M:%S UTC").to_string());
+    html.push_str(
+        &chrono::Utc::now()
+            .format("%Y-%m-%d %H:%M:%S UTC")
+            .to_string(),
+    );
     html.push_str("</p>\n");
     html.push_str("    </div>\n");
 
@@ -694,7 +729,11 @@ fn generate_html_report(summary: &TestRunSummary) -> Result<String> {
     html.push_str("        <h3>Test Results</h3>\n");
 
     for result in &summary.results {
-        let css_class = if result.passed { "test-pass" } else { "test-fail" };
+        let css_class = if result.passed {
+            "test-pass"
+        } else {
+            "test-fail"
+        };
         html.push_str("        <div class=\"test-result ");
         html.push_str(css_class);
         html.push_str("\">\n");

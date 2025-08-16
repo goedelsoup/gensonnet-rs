@@ -90,7 +90,13 @@ pub fn command() -> clap::Command {
         .subcommand(
             clap::Command::new("list")
                 .about("List available plugins")
-                .arg(clap::Arg::new("detailed").short('d').long("detailed").help("Show detailed information").action(clap::ArgAction::SetTrue))
+                .arg(
+                    clap::Arg::new("detailed")
+                        .short('d')
+                        .long("detailed")
+                        .help("Show detailed information")
+                        .action(clap::ArgAction::SetTrue),
+                )
                 .arg(clap::arg!(--capability <CAPABILITY> "Filter by capability"))
                 .arg(clap::arg!(--source_type <SOURCE_TYPE> "Filter by source type")),
         )
@@ -120,7 +126,12 @@ pub fn command() -> clap::Command {
             clap::Command::new("uninstall")
                 .about("Uninstall a plugin")
                 .arg(clap::arg!(<PLUGIN_ID> "Plugin ID"))
-                .arg(clap::Arg::new("remove_files").long("remove_files").help("Remove plugin files").action(clap::ArgAction::SetTrue)),
+                .arg(
+                    clap::Arg::new("remove_files")
+                        .long("remove_files")
+                        .help("Remove plugin files")
+                        .action(clap::ArgAction::SetTrue),
+                ),
         )
 }
 
@@ -155,7 +166,9 @@ pub async fn run(matches: &clap::ArgMatches) -> Result<()> {
             let args = InstallArgs {
                 source,
                 version: sub_matches.get_one::<String>("version").cloned(),
-                target_dir: sub_matches.get_one::<std::path::PathBuf>("target_dir").cloned(),
+                target_dir: sub_matches
+                    .get_one::<std::path::PathBuf>("target_dir")
+                    .cloned(),
             };
             run_install(args).await
         }
@@ -181,17 +194,19 @@ async fn run_list(args: ListArgs) -> Result<()> {
     // Apply filters
     if let Some(capability) = &args.capability {
         plugins.retain(|plugin| {
-            plugin.capabilities.iter().any(|cap| {
-                format!("{:?}", cap).to_lowercase() == capability.to_lowercase()
-            })
+            plugin
+                .capabilities
+                .iter()
+                .any(|cap| format!("{:?}", cap).to_lowercase() == capability.to_lowercase())
         });
     }
 
     if let Some(source_type) = &args.source_type {
         plugins.retain(|plugin| {
-            plugin.supported_types.iter().any(|t| {
-                t.to_lowercase() == source_type.to_lowercase()
-            })
+            plugin
+                .supported_types
+                .iter()
+                .any(|t| t.to_lowercase() == source_type.to_lowercase())
         });
     }
 
@@ -246,7 +261,7 @@ async fn run_info(args: InfoArgs) -> Result<()> {
 
 async fn run_enable(args: EnableArgs) -> Result<()> {
     let app = create_app().await?;
-    
+
     match app.enable_plugin(&args.plugin_id).await {
         Ok(()) => {
             println!("Plugin '{}' enabled successfully.", args.plugin_id);
@@ -256,13 +271,13 @@ async fn run_enable(args: EnableArgs) -> Result<()> {
             return Err(e);
         }
     }
-    
+
     Ok(())
 }
 
 async fn run_disable(args: DisableArgs) -> Result<()> {
     let app = create_app().await?;
-    
+
     match app.disable_plugin(&args.plugin_id).await {
         Ok(()) => {
             println!("Plugin '{}' disabled successfully.", args.plugin_id);
@@ -272,14 +287,21 @@ async fn run_disable(args: DisableArgs) -> Result<()> {
             return Err(e);
         }
     }
-    
+
     Ok(())
 }
 
 async fn run_install(args: InstallArgs) -> Result<()> {
     let app = create_app().await?;
-    
-    match app.install_plugin(&args.source, args.version.as_deref(), args.target_dir.as_ref().map(|v| &**v)).await {
+
+    match app
+        .install_plugin(
+            &args.source,
+            args.version.as_deref(),
+            args.target_dir.as_ref().map(|v| &**v),
+        )
+        .await
+    {
         Ok(()) => {
             println!("Plugin installed successfully from: {}", args.source);
             if let Some(version) = args.version {
@@ -294,14 +316,17 @@ async fn run_install(args: InstallArgs) -> Result<()> {
             return Err(e);
         }
     }
-    
+
     Ok(())
 }
 
 async fn run_uninstall(args: UninstallArgs) -> Result<()> {
     let app = create_app().await?;
-    
-    match app.uninstall_plugin(&args.plugin_id, args.remove_files).await {
+
+    match app
+        .uninstall_plugin(&args.plugin_id, args.remove_files)
+        .await
+    {
         Ok(()) => {
             println!("Plugin '{}' uninstalled successfully.", args.plugin_id);
             if args.remove_files {
@@ -313,7 +338,7 @@ async fn run_uninstall(args: UninstallArgs) -> Result<()> {
             return Err(e);
         }
     }
-    
+
     Ok(())
 }
 

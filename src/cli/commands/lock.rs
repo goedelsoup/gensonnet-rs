@@ -3,8 +3,8 @@
 use crate::lockfile::LockfileManager;
 use anyhow::Result;
 use clap::{ArgMatches, Command};
-use tracing::{info, warn};
 use std::path::PathBuf;
+use tracing::{info, warn};
 
 pub fn command() -> Command {
     Command::new("lock")
@@ -94,14 +94,14 @@ async fn update_lockfile(lockfile_manager: &LockfileManager) -> Result<()> {
 
     // Load configuration to get current sources
     let config = load_config()?;
-    
+
     // Create GitManager for getting commit SHAs
     let git_manager = crate::GitManager::new()?;
-    
+
     // Get current commit SHAs for all sources
     let mut current_sources = std::collections::HashMap::new();
     let mut source_entries = std::collections::HashMap::new();
-    
+
     if config.sources.is_empty() {
         println!("No sources configured. Please create a configuration file with sources.");
         println!("Example configuration:");
@@ -117,10 +117,10 @@ async fn update_lockfile(lockfile_manager: &LockfileManager) -> Result<()> {
         println!("      output_path: \"./generated/my-crds\"");
         return Ok(());
     }
-    
+
     for source in &config.sources {
         let source_name = source.name().to_string();
-        
+
         match source {
             crate::config::Source::Crd(crd_source) => {
                 // Get repository path and current commit
@@ -128,7 +128,10 @@ async fn update_lockfile(lockfile_manager: &LockfileManager) -> Result<()> {
                     Ok(path) => path,
                     Err(e) => {
                         warn!("Failed to access repository {}: {}", crd_source.git.url, e);
-                        println!("Skipping source '{}' due to repository access error", source_name);
+                        println!(
+                            "Skipping source '{}' due to repository access error",
+                            source_name
+                        );
                         continue;
                     }
                 };
@@ -136,19 +139,26 @@ async fn update_lockfile(lockfile_manager: &LockfileManager) -> Result<()> {
                     Ok(sha) => sha,
                     Err(e) => {
                         warn!("Failed to get commit SHA for {}: {}", crd_source.git.url, e);
-                        println!("Skipping source '{}' due to commit access error", source_name);
+                        println!(
+                            "Skipping source '{}' due to commit access error",
+                            source_name
+                        );
                         continue;
                     }
                 };
-                
+
                 // Create lockfile entry
                 let entry = crate::lockfile::LockfileEntry::new(
                     crd_source.git.url.clone(),
-                    crd_source.git.ref_name.clone().unwrap_or_else(|| "main".to_string()),
+                    crd_source
+                        .git
+                        .ref_name
+                        .clone()
+                        .unwrap_or_else(|| "main".to_string()),
                     commit_sha.clone(),
                     crd_source.filters.clone(),
                 );
-                
+
                 current_sources.insert(source_name.clone(), commit_sha);
                 source_entries.insert(source_name, entry);
             }
@@ -157,28 +167,44 @@ async fn update_lockfile(lockfile_manager: &LockfileManager) -> Result<()> {
                 let repo_path = match git_manager.ensure_repository(&go_ast_source.git).await {
                     Ok(path) => path,
                     Err(e) => {
-                        warn!("Failed to access repository {}: {}", go_ast_source.git.url, e);
-                        println!("Skipping source '{}' due to repository access error", source_name);
+                        warn!(
+                            "Failed to access repository {}: {}",
+                            go_ast_source.git.url, e
+                        );
+                        println!(
+                            "Skipping source '{}' due to repository access error",
+                            source_name
+                        );
                         continue;
                     }
                 };
                 let commit_sha = match git_manager.get_current_commit(&repo_path) {
                     Ok(sha) => sha,
                     Err(e) => {
-                        warn!("Failed to get commit SHA for {}: {}", go_ast_source.git.url, e);
-                        println!("Skipping source '{}' due to commit access error", source_name);
+                        warn!(
+                            "Failed to get commit SHA for {}: {}",
+                            go_ast_source.git.url, e
+                        );
+                        println!(
+                            "Skipping source '{}' due to commit access error",
+                            source_name
+                        );
                         continue;
                     }
                 };
-                
+
                 // Create lockfile entry
                 let entry = crate::lockfile::LockfileEntry::new(
                     go_ast_source.git.url.clone(),
-                    go_ast_source.git.ref_name.clone().unwrap_or_else(|| "main".to_string()),
+                    go_ast_source
+                        .git
+                        .ref_name
+                        .clone()
+                        .unwrap_or_else(|| "main".to_string()),
                     commit_sha.clone(),
                     go_ast_source.include_patterns.clone(),
                 );
-                
+
                 current_sources.insert(source_name.clone(), commit_sha);
                 source_entries.insert(source_name, entry);
             }
@@ -187,37 +213,53 @@ async fn update_lockfile(lockfile_manager: &LockfileManager) -> Result<()> {
                 let repo_path = match git_manager.ensure_repository(&openapi_source.git).await {
                     Ok(path) => path,
                     Err(e) => {
-                        warn!("Failed to access repository {}: {}", openapi_source.git.url, e);
-                        println!("Skipping source '{}' due to repository access error", source_name);
+                        warn!(
+                            "Failed to access repository {}: {}",
+                            openapi_source.git.url, e
+                        );
+                        println!(
+                            "Skipping source '{}' due to repository access error",
+                            source_name
+                        );
                         continue;
                     }
                 };
                 let commit_sha = match git_manager.get_current_commit(&repo_path) {
                     Ok(sha) => sha,
                     Err(e) => {
-                        warn!("Failed to get commit SHA for {}: {}", openapi_source.git.url, e);
-                        println!("Skipping source '{}' due to commit access error", source_name);
+                        warn!(
+                            "Failed to get commit SHA for {}: {}",
+                            openapi_source.git.url, e
+                        );
+                        println!(
+                            "Skipping source '{}' due to commit access error",
+                            source_name
+                        );
                         continue;
                     }
                 };
-                
+
                 // Create lockfile entry
                 let entry = crate::lockfile::LockfileEntry::new(
                     openapi_source.git.url.clone(),
-                    openapi_source.git.ref_name.clone().unwrap_or_else(|| "main".to_string()),
+                    openapi_source
+                        .git
+                        .ref_name
+                        .clone()
+                        .unwrap_or_else(|| "main".to_string()),
                     commit_sha.clone(),
                     openapi_source.include_patterns.clone(),
                 );
-                
+
                 current_sources.insert(source_name.clone(), commit_sha);
                 source_entries.insert(source_name, entry);
             }
         }
     }
-    
+
     // Calculate checksums for generated files
     let mut file_checksums = std::collections::HashMap::new();
-    
+
     if config.output.base_path.exists() {
         for entry in walkdir::WalkDir::new(&config.output.base_path)
             .into_iter()
@@ -225,10 +267,11 @@ async fn update_lockfile(lockfile_manager: &LockfileManager) -> Result<()> {
             .filter(|e| e.file_type().is_file())
         {
             let file_path = entry.path();
-            let relative_path = file_path.strip_prefix(&config.output.base_path)
+            let relative_path = file_path
+                .strip_prefix(&config.output.base_path)
                 .unwrap_or(file_path)
                 .to_path_buf();
-            
+
             match crate::lockfile::FileChecksum::from_file(file_path) {
                 Ok(checksum) => {
                     file_checksums.insert(relative_path, checksum);
@@ -239,14 +282,14 @@ async fn update_lockfile(lockfile_manager: &LockfileManager) -> Result<()> {
             }
         }
     }
-    
+
     // Update the lockfile
     lockfile_manager.update(source_entries, file_checksums.clone())?;
-    
+
     println!("Lockfile updated successfully");
     println!("  Sources: {}", current_sources.len());
     println!("  Files: {}", file_checksums.len());
-    
+
     // Show what changed
     if let Ok(existing_lockfile) = lockfile_manager.load_or_create() {
         let changed_sources: Vec<_> = current_sources
@@ -255,7 +298,7 @@ async fn update_lockfile(lockfile_manager: &LockfileManager) -> Result<()> {
                 existing_lockfile.source_changed(source_id, current_commit)
             })
             .collect();
-        
+
         if !changed_sources.is_empty() {
             println!("  Changed sources:");
             for (source_id, commit_sha) in changed_sources {

@@ -482,7 +482,6 @@ pub struct PluginStatus {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
 
     #[test]
     fn test_processing_options() {

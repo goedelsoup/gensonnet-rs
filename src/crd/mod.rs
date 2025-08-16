@@ -522,8 +522,6 @@ pub struct FieldAnalysis {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
-    
 
     #[test]
     fn test_crd_schema_creation() {

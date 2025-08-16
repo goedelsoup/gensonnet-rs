@@ -6,14 +6,14 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use tracing::info;
 
-use crate::plugin::*;
 use crate::crd::{CrdParser, CrdSchema};
+use crate::plugin::*;
 
 /// CRD plugin for processing Kubernetes CustomResourceDefinitions
 pub struct CrdPlugin {
     /// Plugin configuration
     config: PluginConfig,
-    
+
     /// CRD parser instance
     parser: CrdParser,
 }
@@ -54,11 +54,26 @@ impl CrdPlugin {
                 content: crd_schema.schema.clone(),
                 source_file: crd_schema.source_path.clone(),
                 metadata: HashMap::from([
-                    ("group".to_string(), serde_yaml::Value::String(crd_schema.group.clone())),
-                    ("version".to_string(), serde_yaml::Value::String(crd_schema.version.clone())),
-                    ("api_version".to_string(), serde_yaml::Value::String(crd_schema.api_version.clone())),
-                    ("kind".to_string(), serde_yaml::Value::String(crd_schema.kind().to_string())),
-                    ("resource_name".to_string(), serde_yaml::Value::String(crd_schema.resource_name())),
+                    (
+                        "group".to_string(),
+                        serde_yaml::Value::String(crd_schema.group.clone()),
+                    ),
+                    (
+                        "version".to_string(),
+                        serde_yaml::Value::String(crd_schema.version.clone()),
+                    ),
+                    (
+                        "api_version".to_string(),
+                        serde_yaml::Value::String(crd_schema.api_version.clone()),
+                    ),
+                    (
+                        "kind".to_string(),
+                        serde_yaml::Value::String(crd_schema.kind().to_string()),
+                    ),
+                    (
+                        "resource_name".to_string(),
+                        serde_yaml::Value::String(crd_schema.resource_name()),
+                    ),
                 ]),
             };
 
@@ -106,7 +121,9 @@ impl Plugin for CrdPlugin {
         let start_time = std::time::Instant::now();
 
         // Parse CRDs from the source
-        let filters = self.config.config
+        let filters = self
+            .config
+            .config
             .get("filters")
             .and_then(|v| v.as_sequence())
             .map(|seq| {
@@ -118,7 +135,7 @@ impl Plugin for CrdPlugin {
             .unwrap_or_default();
 
         let crd_schemas = self.parser.parse_from_directory(source_path, &filters)?;
-        
+
         // Extract schemas
         let extracted_schemas = self.extract_schemas_from_crd(crd_schemas).await;
         let schemas_count = extracted_schemas.len();
@@ -158,11 +175,13 @@ impl Plugin for CrdPlugin {
         // Generate Jsonnet library for each schema
         for schema in schemas {
             let schema_name = &schema.name;
-            let output_file = context.output_dir.join(format!("{}.libsonnet", schema_name.to_lowercase()));
+            let output_file = context
+                .output_dir
+                .join(format!("{}.libsonnet", schema_name.to_lowercase()));
 
             // Generate Jsonnet content
             let jsonnet_content = self.generate_jsonnet_content(schema)?;
-            
+
             // Write to file
             tokio::fs::write(&output_file, jsonnet_content).await?;
             generated_files.push(output_file);
@@ -192,18 +211,24 @@ impl CrdPlugin {
     /// Generate Jsonnet content for a schema
     fn generate_jsonnet_content(&self, schema: &ExtractedSchema) -> Result<String> {
         let schema_name = &schema.name;
-        let group = schema.metadata.get("group")
+        let group = schema
+            .metadata
+            .get("group")
             .and_then(|v| v.as_str())
             .unwrap_or("");
-        let version = schema.metadata.get("version")
+        let version = schema
+            .metadata
+            .get("version")
             .and_then(|v| v.as_str())
             .unwrap_or("");
-        let kind = schema.metadata.get("kind")
+        let kind = schema
+            .metadata
+            .get("kind")
             .and_then(|v| v.as_str())
             .unwrap_or(schema_name);
 
         let mut content = String::new();
-        
+
         // Add header comment
         content.push_str(&format!("// Generated from CRD: {}\n", schema_name));
         content.push_str(&format!("// API Group: {}\n", group));
@@ -219,15 +244,24 @@ impl CrdPlugin {
         content.push_str(&format!("    apiVersion: \"{}/{}\",\n", group, version));
         content.push_str(&format!("    kind: \"{}\",\n", kind));
         content.push_str(&format!("    metadata:: {{\n"));
-        content.push_str(&format!("      name: \"example-{}\",\n", schema_name.to_lowercase()));
+        content.push_str(&format!(
+            "      name: \"example-{}\",\n",
+            schema_name.to_lowercase()
+        ));
         content.push_str(&format!("    }},\n"));
         content.push_str(&format!("    spec:: {{}},\n"));
         content.push_str(&format!("  }},\n"));
 
         // Add helper functions
-        content.push_str(&format!("  // Helper function to create a new {}\n", schema_name));
+        content.push_str(&format!(
+            "  // Helper function to create a new {}\n",
+            schema_name
+        ));
         content.push_str(&format!("  new{}:: function(name) {{\n", schema_name));
-        content.push_str(&format!("    self.{}(name) {{\n", schema_name.to_lowercase()));
+        content.push_str(&format!(
+            "    self.{}(name) {{\n",
+            schema_name.to_lowercase()
+        ));
         content.push_str(&format!("      metadata+: {{\n"));
         content.push_str(&format!("        name: name,\n"));
         content.push_str(&format!("      }},\n"));
@@ -242,15 +276,18 @@ impl CrdPlugin {
     /// Generate index content
     fn generate_index_content(&self, schemas: &[ExtractedSchema]) -> Result<String> {
         let mut content = String::new();
-        
+
         content.push_str("// CRD Library Index\n");
         content.push_str("// This file exports all CRD schemas\n\n");
 
         // Import all schema files
         for schema in schemas {
             let schema_name = &schema.name;
-            content.push_str(&format!("local {} = import \"{}.libsonnet\";\n", 
-                schema_name.to_lowercase(), schema_name.to_lowercase()));
+            content.push_str(&format!(
+                "local {} = import \"{}.libsonnet\";\n",
+                schema_name.to_lowercase(),
+                schema_name.to_lowercase()
+            ));
         }
 
         content.push_str("\n{\n");
@@ -258,8 +295,12 @@ impl CrdPlugin {
         // Export all schemas
         for schema in schemas {
             let schema_name = &schema.name;
-            content.push_str(&format!("  {}: {}.{},\n", 
-                schema_name, schema_name.to_lowercase(), schema_name.to_lowercase()));
+            content.push_str(&format!(
+                "  {}: {}.{},\n",
+                schema_name,
+                schema_name.to_lowercase(),
+                schema_name.to_lowercase()
+            ));
         }
 
         content.push_str("}\n");
@@ -296,15 +337,12 @@ mod tests {
         let config = PluginConfig {
             plugin_id: "crd:test".to_string(),
             config: serde_yaml::Value::Null,
-            enabled_capabilities: vec![
-                PluginCapability::Parse,
-                PluginCapability::SchemaExtraction,
-            ],
+            enabled_capabilities: vec![PluginCapability::Parse, PluginCapability::SchemaExtraction],
         };
 
         let plugin = CrdPlugin::new(config);
         let metadata = plugin.metadata();
-        
+
         assert_eq!(metadata.id, "crd:builtin");
         assert_eq!(metadata.name, "CRD Plugin");
         assert!(metadata.supported_types.contains(&"yaml".to_string()));
@@ -316,15 +354,12 @@ mod tests {
         let config = PluginConfig {
             plugin_id: "crd:test".to_string(),
             config: serde_yaml::Value::Null,
-            enabled_capabilities: vec![
-                PluginCapability::Parse,
-                PluginCapability::SchemaExtraction,
-            ],
+            enabled_capabilities: vec![PluginCapability::Parse, PluginCapability::SchemaExtraction],
         };
 
         let plugin = factory.create_plugin(config).await.unwrap();
         let metadata = plugin.metadata();
-        
+
         assert_eq!(metadata.id, "crd:builtin");
         assert!(factory.supported_types().contains(&"crd".to_string()));
     }
@@ -334,18 +369,17 @@ mod tests {
         let config = PluginConfig {
             plugin_id: "crd:test".to_string(),
             config: serde_yaml::Value::Null,
-            enabled_capabilities: vec![
-                PluginCapability::Parse,
-                PluginCapability::SchemaExtraction,
-            ],
+            enabled_capabilities: vec![PluginCapability::Parse, PluginCapability::SchemaExtraction],
         };
 
         let plugin = CrdPlugin::new(config);
         let temp_dir = TempDir::new().unwrap();
-        
+
         // Test with non-CRD file
         let non_crd_file = temp_dir.path().join("test.txt");
-        tokio::fs::write(&non_crd_file, "This is not a CRD").await.unwrap();
+        tokio::fs::write(&non_crd_file, "This is not a CRD")
+            .await
+            .unwrap();
         assert!(!plugin.can_handle(&non_crd_file).await.unwrap());
 
         // Test with CRD file

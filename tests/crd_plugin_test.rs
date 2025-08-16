@@ -1,6 +1,6 @@
 use anyhow::Result;
-use jsonnet_gen::plugin::*;
 use jsonnet_gen::plugin::crd::{CrdPlugin, CrdPluginFactory};
+use jsonnet_gen::plugin::*;
 use std::path::PathBuf;
 use tempfile::TempDir;
 
@@ -9,7 +9,7 @@ async fn test_crd_plugin_integration() -> Result<()> {
     // Create a temporary directory for the test
     let temp_dir = TempDir::new()?;
     let test_crd_file = temp_dir.path().join("test-crd.yaml");
-    
+
     // Copy the test CRD file
     let source_crd = PathBuf::from("test-data/test-crd-plugin.yaml");
     tokio::fs::copy(&source_crd, &test_crd_file).await?;
@@ -48,13 +48,19 @@ async fn test_crd_plugin_integration() -> Result<()> {
 
     // Check metadata
     let metadata = &result.schemas[0].metadata;
-    assert_eq!(metadata.get("group").and_then(|v| v.as_str()), Some("test.com"));
+    assert_eq!(
+        metadata.get("group").and_then(|v| v.as_str()),
+        Some("test.com")
+    );
     assert_eq!(metadata.get("version").and_then(|v| v.as_str()), Some("v1"));
-    assert_eq!(metadata.get("kind").and_then(|v| v.as_str()), Some("Example"));
+    assert_eq!(
+        metadata.get("kind").and_then(|v| v.as_str()),
+        Some("Example")
+    );
 
     // Verify generated files
     assert!(!result.generated_files.is_empty());
-    
+
     // Check that the output directory was created
     assert!(context.output_dir.exists());
 
@@ -67,7 +73,7 @@ async fn test_crd_plugin_integration() -> Result<()> {
 #[tokio::test]
 async fn test_crd_plugin_factory() -> Result<()> {
     let factory = CrdPluginFactory;
-    
+
     // Test supported types
     let supported_types = factory.supported_types();
     assert!(supported_types.contains(&"crd".to_string()));
@@ -78,15 +84,12 @@ async fn test_crd_plugin_factory() -> Result<()> {
     let config = PluginConfig {
         plugin_id: "crd:test".to_string(),
         config: serde_yaml::Value::Null,
-        enabled_capabilities: vec![
-            PluginCapability::Parse,
-            PluginCapability::SchemaExtraction,
-        ],
+        enabled_capabilities: vec![PluginCapability::Parse, PluginCapability::SchemaExtraction],
     };
 
     let plugin = factory.create_plugin(config).await?;
     let metadata = plugin.metadata();
-    
+
     assert_eq!(metadata.id, "crd:builtin");
     assert_eq!(metadata.name, "CRD Plugin");
 

@@ -420,7 +420,10 @@ impl PluginTestRunner {
                                 can_handle_results.push((test_file, can_handle));
                             }
                             Err(e) => {
-                                warnings.push(format!("Failed to check if plugin can handle {:?}: {}", test_file, e));
+                                warnings.push(format!(
+                                    "Failed to check if plugin can handle {:?}: {}",
+                                    test_file, e
+                                ));
                             }
                         }
                     }
@@ -428,8 +431,7 @@ impl PluginTestRunner {
                     // Create a summary of initialization results
                     let content = format!(
                         "Plugin '{}' initialized successfully.\nCan handle files: {:?}",
-                        context.config.plugin_id,
-                        can_handle_results
+                        context.config.plugin_id, can_handle_results
                     );
 
                     Ok(TestOutput {
@@ -452,7 +454,10 @@ impl PluginTestRunner {
                 }
             }
         } else {
-            errors.push(format!("Plugin '{}' not found in plugin manager", context.config.plugin_id));
+            errors.push(format!(
+                "Plugin '{}' not found in plugin manager",
+                context.config.plugin_id
+            ));
             Ok(TestOutput {
                 files: Vec::new(),
                 content: String::new(),
@@ -607,7 +612,10 @@ impl PluginTestRunner {
                 Err(e) => {
                     invalid_schemas += 1;
                     validation_details.push(format!("✗ {}: Validation error - {}", schema_name, e));
-                    errors.push(format!("Validation error for schema '{}': {}", schema_name, e));
+                    errors.push(format!(
+                        "Validation error for schema '{}': {}",
+                        schema_name, e
+                    ));
                 }
             }
         }
@@ -638,7 +646,10 @@ impl PluginTestRunner {
         // Check if the plugin supports validation capability
         if let Some(plugin) = plugin_manager.get_plugin(&context.config.plugin_id).await {
             let metadata = plugin.metadata();
-            if !metadata.capabilities.contains(&PluginCapability::Validation) {
+            if !metadata
+                .capabilities
+                .contains(&PluginCapability::Validation)
+            {
                 return Ok(true); // Skip validation if plugin doesn't support it
             }
 
@@ -687,7 +698,9 @@ impl PluginTestRunner {
                 }
                 _ => {
                     // For other schema types, just check basic structure
-                    if !schema.content.as_mapping().is_some() && !schema.content.as_sequence().is_some() {
+                    if !schema.content.as_mapping().is_some()
+                        && !schema.content.as_sequence().is_some()
+                    {
                         is_valid = false;
                     }
                 }
@@ -714,8 +727,14 @@ impl PluginTestRunner {
         let error_scenarios = vec![
             ("invalid_file_path", PathBuf::from("/nonexistent/file.go")),
             ("empty_file", self.temp_dir.path().join("empty.go")),
-            ("malformed_content", self.temp_dir.path().join("malformed.go")),
-            ("unsupported_extension", self.temp_dir.path().join("test.xyz")),
+            (
+                "malformed_content",
+                self.temp_dir.path().join("malformed.go"),
+            ),
+            (
+                "unsupported_extension",
+                self.temp_dir.path().join("test.xyz"),
+            ),
         ];
 
         // Create test files for error scenarios
@@ -726,12 +745,9 @@ impl PluginTestRunner {
         )?;
 
         for (scenario_name, file_path) in error_scenarios {
-            let result = self.test_error_scenario(
-                scenario_name,
-                &file_path,
-                context,
-                plugin_manager,
-            ).await;
+            let result = self
+                .test_error_scenario(scenario_name, &file_path, context, plugin_manager)
+                .await;
             error_handling_results.push((scenario_name.to_string(), result));
         }
 
@@ -748,14 +764,21 @@ impl PluginTestRunner {
                         error_details.push(format!("✓ {}: Error handled properly", scenario_name));
                     } else {
                         unhandled_errors += 1;
-                        error_details.push(format!("✗ {}: Error not handled properly", scenario_name));
-                        errors.push(format!("Error scenario '{}' was not handled properly", scenario_name));
+                        error_details
+                            .push(format!("✗ {}: Error not handled properly", scenario_name));
+                        errors.push(format!(
+                            "Error scenario '{}' was not handled properly",
+                            scenario_name
+                        ));
                     }
                 }
                 Err(e) => {
                     unhandled_errors += 1;
                     error_details.push(format!("✗ {}: Test failed - {}", scenario_name, e));
-                    errors.push(format!("Error handling test failed for '{}': {}", scenario_name, e));
+                    errors.push(format!(
+                        "Error handling test failed for '{}': {}",
+                        scenario_name, e
+                    ));
                 }
             }
         }
@@ -797,25 +820,25 @@ impl PluginTestRunner {
                 let error_message = e.to_string().to_lowercase();
                 let handled_properly = match scenario_name {
                     "invalid_file_path" => {
-                        error_message.contains("not found") || 
-                        error_message.contains("no such file") ||
-                        error_message.contains("cannot find")
+                        error_message.contains("not found")
+                            || error_message.contains("no such file")
+                            || error_message.contains("cannot find")
                     }
                     "empty_file" => {
-                        error_message.contains("empty") ||
-                        error_message.contains("no content") ||
-                        error_message.contains("invalid")
+                        error_message.contains("empty")
+                            || error_message.contains("no content")
+                            || error_message.contains("invalid")
                     }
                     "malformed_content" => {
-                        error_message.contains("syntax") ||
-                        error_message.contains("parse") ||
-                        error_message.contains("malformed") ||
-                        error_message.contains("invalid")
+                        error_message.contains("syntax")
+                            || error_message.contains("parse")
+                            || error_message.contains("malformed")
+                            || error_message.contains("invalid")
                     }
                     "unsupported_extension" => {
-                        error_message.contains("unsupported") ||
-                        error_message.contains("cannot handle") ||
-                        error_message.contains("unknown")
+                        error_message.contains("unsupported")
+                            || error_message.contains("cannot handle")
+                            || error_message.contains("unknown")
                     }
                     _ => true, // Default to true for unknown scenarios
                 };
@@ -847,17 +870,21 @@ impl PluginTestRunner {
 
             let result = match &test_case.test_type {
                 TestCaseType::SourceProcessing => {
-                    self.test_source_processing(test_case, context, plugin_manager).await
+                    self.test_source_processing(test_case, context, plugin_manager)
+                        .await
                 }
                 TestCaseType::SchemaExtraction => {
-                    self.test_schema_extraction(test_case, context, plugin_manager).await
+                    self.test_schema_extraction(test_case, context, plugin_manager)
+                        .await
                 }
                 TestCaseType::CodeGeneration => {
-                    self.test_code_generation(test_case, context, plugin_manager).await
+                    self.test_code_generation(test_case, context, plugin_manager)
+                        .await
                 }
                 _ => {
                     // For other test types, use source processing as default
-                    self.test_source_processing(test_case, context, plugin_manager).await
+                    self.test_source_processing(test_case, context, plugin_manager)
+                        .await
                 }
             };
 
@@ -868,13 +895,17 @@ impl PluginTestRunner {
             match result {
                 Ok(output) => {
                     let output_size = self.calculate_output_size(&output);
-                    
+
                     processing_times.push(processing_time.as_millis() as u64);
                     memory_usages.push(memory_usage);
                     output_sizes.push(output_size);
                 }
                 Err(e) => {
-                    errors.push(format!("Performance test iteration {} failed: {}", i + 1, e));
+                    errors.push(format!(
+                        "Performance test iteration {} failed: {}",
+                        i + 1,
+                        e
+                    ));
                 }
             }
         }
@@ -984,10 +1015,25 @@ impl PluginTestRunner {
 
         // Test the full integration workflow: initialization -> source processing -> schema extraction -> code generation
         let workflow_steps = vec![
-            ("initialization", self.test_initialization(context, plugin_manager).await),
-            ("source_processing", self.test_source_processing(test_case, context, plugin_manager).await),
-            ("schema_extraction", self.test_schema_extraction(test_case, context, plugin_manager).await),
-            ("code_generation", self.test_code_generation(test_case, context, plugin_manager).await),
+            (
+                "initialization",
+                self.test_initialization(context, plugin_manager).await,
+            ),
+            (
+                "source_processing",
+                self.test_source_processing(test_case, context, plugin_manager)
+                    .await,
+            ),
+            (
+                "schema_extraction",
+                self.test_schema_extraction(test_case, context, plugin_manager)
+                    .await,
+            ),
+            (
+                "code_generation",
+                self.test_code_generation(test_case, context, plugin_manager)
+                    .await,
+            ),
         ];
 
         let mut all_schemas = Vec::new();
@@ -998,15 +1044,15 @@ impl PluginTestRunner {
             match step_result {
                 Ok(output) => {
                     step_results.push(format!("✓ {}: Success", step_name));
-                    
+
                     // Collect schemas and files from each step
                     all_schemas.extend(output.schemas.clone());
                     all_files.extend(output.files.clone());
-                    
+
                     // Add warnings and errors
                     warnings.extend(output.warnings.clone());
                     errors.extend(output.errors.clone());
-                    
+
                     integration_results.push((step_name.to_string(), Ok(output)));
                 }
                 Err(e) => {
@@ -1055,7 +1101,11 @@ impl PluginTestRunner {
             all_files.len(),
             warnings.len(),
             errors.len(),
-            if errors.is_empty() { "PASSED" } else { "FAILED" }
+            if errors.is_empty() {
+                "PASSED"
+            } else {
+                "FAILED"
+            }
         );
 
         Ok(TestOutput {
@@ -1074,17 +1124,21 @@ impl PluginTestRunner {
         let test_value = serde_yaml::Value::String("integration_test_value".to_string());
 
         // Set a value
-        context.set_shared_value(test_key.to_string(), test_value.clone()).await;
+        context
+            .set_shared_value(test_key.to_string(), test_value.clone())
+            .await;
 
         // Get the value back
         let retrieved_value = context.get_shared_value(test_key).await;
-        
+
         match retrieved_value {
             Some(value) => {
                 if value == test_value {
                     Ok(())
                 } else {
-                    Err(anyhow::anyhow!("Retrieved value doesn't match original value"))
+                    Err(anyhow::anyhow!(
+                        "Retrieved value doesn't match original value"
+                    ))
                 }
             }
             None => Err(anyhow::anyhow!("Failed to retrieve shared state value")),
@@ -1104,15 +1158,34 @@ impl PluginTestRunner {
 
         // Handle different custom test types
         let result = match custom_type.to_lowercase().as_str() {
-            "concurrent" => self.test_concurrent_execution(test_case, context, plugin_manager).await,
-            "stress" => self.test_stress_execution(test_case, context, plugin_manager).await,
-            "memory_leak" => self.test_memory_leak_detection(test_case, context, plugin_manager).await,
-            "compatibility" => self.test_compatibility(test_case, context, plugin_manager).await,
-            "security" => self.test_security_checks(test_case, context, plugin_manager).await,
+            "concurrent" => {
+                self.test_concurrent_execution(test_case, context, plugin_manager)
+                    .await
+            }
+            "stress" => {
+                self.test_stress_execution(test_case, context, plugin_manager)
+                    .await
+            }
+            "memory_leak" => {
+                self.test_memory_leak_detection(test_case, context, plugin_manager)
+                    .await
+            }
+            "compatibility" => {
+                self.test_compatibility(test_case, context, plugin_manager)
+                    .await
+            }
+            "security" => {
+                self.test_security_checks(test_case, context, plugin_manager)
+                    .await
+            }
             _ => {
                 // For unknown custom types, try to execute as a combination of existing tests
-                warnings.push(format!("Unknown custom test type '{}', running basic tests", custom_type));
-                self.test_basic_custom_execution(test_case, context, plugin_manager).await
+                warnings.push(format!(
+                    "Unknown custom test type '{}', running basic tests",
+                    custom_type
+                ));
+                self.test_basic_custom_execution(test_case, context, plugin_manager)
+                    .await
             }
         };
 
@@ -1154,7 +1227,7 @@ impl PluginTestRunner {
                 let context = context.clone();
                 let plugin_manager = plugin_manager.clone();
                 let temp_dir = self.temp_dir.path().to_path_buf();
-                
+
                 tokio::spawn(async move {
                     // Create a unique context for each task
                     let task_context = PluginContext::new(
@@ -1162,7 +1235,7 @@ impl PluginTestRunner {
                         temp_dir.join(format!("task_{}_output", i)),
                         context.config.clone(),
                     );
-                    
+
                     // Process the test case
                     let runner = PluginTestRunner::new(PluginTestSuite {
                         name: format!("concurrent_task_{}", i),
@@ -1172,8 +1245,10 @@ impl PluginTestRunner {
                         setup: None,
                         cleanup: None,
                     })?;
-                    
-                    runner.test_source_processing(&test_case, &task_context, &plugin_manager).await
+
+                    runner
+                        .test_source_processing(&test_case, &task_context, &plugin_manager)
+                        .await
                 })
             })
             .collect();
@@ -1234,8 +1309,10 @@ impl PluginTestRunner {
 
         for _i in 0..iterations {
             let start_time = std::time::Instant::now();
-            
-            let result = self.test_source_processing(test_case, context, plugin_manager).await;
+
+            let result = self
+                .test_source_processing(test_case, context, plugin_manager)
+                .await;
             let processing_time = start_time.elapsed().as_millis() as u64;
             total_processing_time += processing_time;
 
@@ -1255,11 +1332,7 @@ impl PluginTestRunner {
             Failures: {}\n\
             Success Rate: {:.1}%\n\
             Average Processing Time: {}ms",
-            iterations,
-            success_count,
-            failure_count,
-            success_rate,
-            avg_processing_time
+            iterations, success_count, failure_count, success_rate, avg_processing_time
         );
 
         Ok(TestOutput {
@@ -1287,16 +1360,18 @@ impl PluginTestRunner {
 
         for _i in 0..iterations {
             let initial_memory = self.get_memory_usage();
-            
+
             // Run the test
-            let _result = self.test_source_processing(test_case, context, plugin_manager).await;
-            
+            let _result = self
+                .test_source_processing(test_case, context, plugin_manager)
+                .await;
+
             // Force garbage collection by dropping result
             drop(_result);
-            
+
             let final_memory = self.get_memory_usage();
             memory_readings.push((initial_memory, final_memory));
-            
+
             // Small delay to allow memory cleanup
             tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
         }
@@ -1317,13 +1392,11 @@ impl PluginTestRunner {
             Average Memory Growth: {} bytes\n\
             Maximum Memory Growth: {} bytes\n\
             Memory Growth Pattern: {:?}",
-            iterations,
-            avg_growth,
-            max_growth,
-            memory_growth
+            iterations, avg_growth, max_growth, memory_growth
         );
 
-        let warnings = if avg_growth > 1024 * 1024 { // 1MB threshold
+        let warnings = if avg_growth > 1024 * 1024 {
+            // 1MB threshold
             vec!["Potential memory leak detected: average growth > 1MB".to_string()]
         } else {
             Vec::new()
@@ -1414,14 +1487,20 @@ impl PluginTestRunner {
 
         for (test_name, malicious_input) in &security_tests {
             // Create a test file with malicious content
-            let temp_file = self.temp_dir.path().join(format!("security_test_{}.txt", test_name));
+            let temp_file = self
+                .temp_dir
+                .path()
+                .join(format!("security_test_{}.txt", test_name));
             std::fs::write(&temp_file, malicious_input)?;
 
             let result = plugin_manager.process_source(&temp_file, context).await;
             match result {
                 Ok(_) => {
                     // This might be a security issue - the plugin processed malicious input
-                    security_issues.push(format!("{}: Plugin processed potentially malicious input", test_name));
+                    security_issues.push(format!(
+                        "{}: Plugin processed potentially malicious input",
+                        test_name
+                    ));
                 }
                 Err(_) => {
                     // This is good - the plugin rejected malicious input
@@ -1462,8 +1541,12 @@ impl PluginTestRunner {
         plugin_manager: &Arc<PluginManager>,
     ) -> Result<TestOutput> {
         // Run a combination of basic tests
-        let source_result = self.test_source_processing(test_case, context, plugin_manager).await;
-        let schema_result = self.test_schema_extraction(test_case, context, plugin_manager).await;
+        let source_result = self
+            .test_source_processing(test_case, context, plugin_manager)
+            .await;
+        let schema_result = self
+            .test_schema_extraction(test_case, context, plugin_manager)
+            .await;
 
         let mut all_schemas = Vec::new();
         let mut all_files = Vec::new();

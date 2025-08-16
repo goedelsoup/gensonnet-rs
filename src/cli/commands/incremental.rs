@@ -3,10 +3,10 @@
 use crate::cli::utils;
 use anyhow::Result;
 use clap::{ArgMatches, Command};
-use tracing::{info, error};
+use futures::stream::{self, StreamExt};
 use std::sync::Arc;
 use tokio::sync::Semaphore;
-use futures::stream::{self, StreamExt};
+use tracing::{error, info};
 
 pub fn command() -> Command {
     Command::new("incremental")
@@ -77,15 +77,21 @@ pub async fn run(matches: &ArgMatches) -> Result<()> {
                     status.dependent_sources.len()
                 );
                 println!("Estimated time: {}ms", status.estimated_time_ms);
-                
+
                 if parallel {
-                    println!("Parallel processing would be enabled with {} workers", max_workers);
+                    println!(
+                        "Parallel processing would be enabled with {} workers",
+                        max_workers
+                    );
                 }
             }
             Err(e) => {
                 println!("Could not determine status due to error: {}", e);
                 println!("This might be due to repository access issues.");
-                println!("Total sources in configuration: {}", app.config.sources.len());
+                println!(
+                    "Total sources in configuration: {}",
+                    app.config.sources.len()
+                );
             }
         }
 
@@ -102,7 +108,7 @@ pub async fn run(matches: &ArgMatches) -> Result<()> {
     if parallel {
         info!("Parallel processing enabled with {} workers", max_workers);
         println!("Parallel processing enabled with {max_workers} workers");
-        
+
         // Get sources that need to be processed
         let sources_to_process = match app.get_status().await {
             Ok(status) => {
@@ -131,24 +137,32 @@ pub async fn run(matches: &ArgMatches) -> Result<()> {
                 app.config.sources.iter().collect::<Vec<_>>()
             }
         };
-        
+
         if sources_to_process.is_empty() {
             println!("No sources to process");
             return Ok(());
         }
-        
-        println!("Processing {} sources in parallel", sources_to_process.len());
-        
+
+        println!(
+            "Processing {} sources in parallel",
+            sources_to_process.len()
+        );
+
         // Process sources in parallel
         let results = process_sources_parallel(&app, &sources_to_process, max_workers).await?;
-        
+
         // Calculate cache hit rate
         let cache_hit_rate = if force {
             // Force mode: no cache hits since all sources are processed
             0.0
         } else {
             // Try to get the incremental plan to calculate cache hit rate
-            match app.lockfile_manager.get_incremental_plan(&sources_to_process.iter().map(|s| s.name().to_string()).collect::<Vec<_>>()) {
+            match app.lockfile_manager.get_incremental_plan(
+                &sources_to_process
+                    .iter()
+                    .map(|s| s.name().to_string())
+                    .collect::<Vec<_>>(),
+            ) {
                 Ok(plan) => app.calculate_cache_hit_rate(&plan),
                 Err(_) => {
                     // Fallback calculation based on sources processed
@@ -162,12 +176,12 @@ pub async fn run(matches: &ArgMatches) -> Result<()> {
                 }
             }
         };
-        
+
         // Create generation result
         let total_errors: usize = results.iter().map(|r| r.errors.len()).sum();
         let total_warnings: usize = results.iter().map(|r| r.warnings.len()).sum();
         let files_generated: usize = results.iter().map(|r| r.files_generated).sum();
-        
+
         let result = crate::generator::GenerationResult {
             sources_processed: results.len(),
             total_sources: app.config.sources.len(),
@@ -181,10 +195,10 @@ pub async fn run(matches: &ArgMatches) -> Result<()> {
                 cache_hit_rate,
             },
         };
-        
+
         // Display results
         display_generation_results(&result);
-        
+
         return Ok(());
     }
 
@@ -241,51 +255,57 @@ async fn process_sources_parallel(
 ) -> Result<Vec<crate::generator::SourceResult>> {
     let semaphore = Arc::new(Semaphore::new(max_workers));
     let app = Arc::new(app);
-    
+
     let futures = sources.iter().map(|source| {
         let semaphore = Arc::clone(&semaphore);
         let app = Arc::clone(&app);
         let source = *source;
-        
+
         async move {
             let _permit = semaphore.acquire().await.unwrap();
             let source_name = source.name().to_string();
-            
+
             info!("Processing source in parallel: {}", source_name);
             println!("Processing: {}", source_name);
-            
+
             match app.process_source_with_recovery(source).await {
                 Ok(result) => {
                     info!("Successfully processed source in parallel: {}", source_name);
-                    println!("Completed: {} ({} files generated)", source_name, result.files_generated);
+                    println!(
+                        "Completed: {} ({} files generated)",
+                        source_name, result.files_generated
+                    );
                     Ok(result)
                 }
                 Err(e) => {
-                    error!("Failed to process source in parallel {}: {}", source_name, e);
+                    error!(
+                        "Failed to process source in parallel {}: {}",
+                        source_name, e
+                    );
                     println!("Failed: {} - {}", source_name, e);
                     Err(e)
                 }
             }
         }
     });
-    
+
     // Collect results, allowing some failures
     let results = stream::iter(futures)
         .buffer_unordered(max_workers)
         .collect::<Vec<_>>()
         .await;
-    
+
     // Separate successful and failed results
     let mut successful_results = Vec::new();
     let mut errors = Vec::new();
-    
+
     for result in results {
         match result {
             Ok(source_result) => successful_results.push(source_result),
             Err(e) => errors.push(e),
         }
     }
-    
+
     // Report any errors
     if !errors.is_empty() {
         println!("{} sources failed to process:", errors.len());
@@ -293,7 +313,7 @@ async fn process_sources_parallel(
             eprintln!("  Error: {}", error);
         }
     }
-    
+
     Ok(successful_results)
 }
 

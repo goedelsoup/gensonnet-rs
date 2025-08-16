@@ -65,28 +65,37 @@ pub async fn run(matches: &ArgMatches) -> Result<()> {
     if matches.get_flag("dry-run") {
         info!("Dry run mode - no files will be written");
         println!("Dry run mode - no files will be written");
-        
+
         let result = app.dry_run().await?;
-        
+
         println!("Dry run completed successfully!");
         println!(
             "Sources that would be processed: {}/{}",
             result.sources_processed, result.total_sources
         );
-        println!("Files that would be generated: {}", result.statistics.files_would_generate);
+        println!(
+            "Files that would be generated: {}",
+            result.statistics.files_would_generate
+        );
         println!(
             "Estimated processing time: {}ms",
             result.statistics.total_processing_time_ms
         );
-        
+
         if result.statistics.incremental_mode {
             println!("Would use incremental generation:");
-            println!("  Changed sources: {}", result.statistics.changed_sources_count);
-            println!("  Dependent sources: {}", result.statistics.dependent_sources_count);
+            println!(
+                "  Changed sources: {}",
+                result.statistics.changed_sources_count
+            );
+            println!(
+                "  Dependent sources: {}",
+                result.statistics.dependent_sources_count
+            );
         } else {
             println!("Would perform full generation for all sources");
         }
-        
+
         println!(
             "Estimated cache hit rate: {:.1}%",
             result.statistics.cache_hit_rate * 100.0
@@ -97,13 +106,18 @@ pub async fn run(matches: &ArgMatches) -> Result<()> {
         }
 
         if result.statistics.warning_count > 0 {
-            println!("Warnings that would occur: {}", result.statistics.warning_count);
+            println!(
+                "Warnings that would occur: {}",
+                result.statistics.warning_count
+            );
         }
 
         for source_result in result.results {
             println!(
                 "  {} ({}): {} files would be generated",
-                source_result.source_name, source_result.source_type, source_result.files_would_generate
+                source_result.source_name,
+                source_result.source_type,
+                source_result.files_would_generate
             );
             if !source_result.errors.is_empty() {
                 for error in source_result.errors {
@@ -116,7 +130,7 @@ pub async fn run(matches: &ArgMatches) -> Result<()> {
                 }
             }
         }
-        
+
         return Ok(());
     }
 

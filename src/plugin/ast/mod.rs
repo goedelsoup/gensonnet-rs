@@ -221,10 +221,10 @@ pub struct Position {
 pub struct GoAstParser {
     /// Tree-sitter parser
     parser: Parser,
-    
+
     /// Go language
     language: Language,
-    
+
     /// Parsed AST nodes
     nodes: Vec<GoAstNode>,
 
@@ -293,15 +293,20 @@ impl GoAstParser {
     }
 
     /// Extract package information from AST
-    fn extract_package_info(&mut self, root_node: &Node, file_path: &Path, content: &str) -> Result<()> {
+    fn extract_package_info(
+        &mut self,
+        root_node: &Node,
+        file_path: &Path,
+        content: &str,
+    ) -> Result<()> {
         let mut cursor = root_node.walk();
-        
+
         for node in root_node.children(&mut cursor) {
             if node.kind() == "package_clause" {
                 for child in node.children(&mut node.walk()) {
                     if child.kind() == "package_identifier" {
                         let package_name = self.get_node_text(child, content);
-                        
+
                         self.package_info = Some(PackageNode {
                             name: package_name,
                             path: file_path.to_string_lossy().to_string(),
@@ -313,27 +318,37 @@ impl GoAstParser {
                 break;
             }
         }
-        
+
         Ok(())
     }
 
     /// Extract type declarations from AST
-    fn extract_type_declarations(&mut self, root_node: &Node, file_path: &Path, content: &str) -> Result<()> {
+    fn extract_type_declarations(
+        &mut self,
+        root_node: &Node,
+        file_path: &Path,
+        content: &str,
+    ) -> Result<()> {
         let mut cursor = root_node.walk();
-        
+
         for node in root_node.children(&mut cursor) {
             if node.kind() == "type_declaration" {
                 self.process_type_declaration(&node, file_path, content)?;
             }
         }
-        
+
         Ok(())
     }
 
     /// Process a type declaration node
-    fn process_type_declaration(&mut self, type_decl_node: &Node, file_path: &Path, content: &str) -> Result<()> {
+    fn process_type_declaration(
+        &mut self,
+        type_decl_node: &Node,
+        file_path: &Path,
+        content: &str,
+    ) -> Result<()> {
         let mut cursor = type_decl_node.walk();
-        
+
         // Process type specs directly
         for child in type_decl_node.children(&mut cursor) {
             if child.kind() == "type_spec" {
@@ -346,42 +361,48 @@ impl GoAstParser {
                 }
             }
         }
-        
+
         Ok(())
     }
 
     /// Process a type spec node
-    fn process_type_spec(&mut self, type_spec: &Node, file_path: &Path, content: &str) -> Result<()> {
+    fn process_type_spec(
+        &mut self,
+        type_spec: &Node,
+        file_path: &Path,
+        content: &str,
+    ) -> Result<()> {
         let mut name_node = None;
         let mut type_node = None;
         let mut cursor = type_spec.walk();
-        
+
         // Extract name and type
         for child in type_spec.children(&mut cursor) {
             match child.kind() {
                 "type_identifier" => name_node = Some(child),
-                "struct_type" | "interface_type" | "array_type" | "pointer_type" | "map_type" | "slice_type" | "channel_type" | "function_type" => {
+                "struct_type" | "interface_type" | "array_type" | "pointer_type" | "map_type"
+                | "slice_type" | "channel_type" | "function_type" => {
                     type_node = Some(child);
                 }
                 _ => {}
             }
         }
-        
+
         if let (Some(name), Some(type_def_node)) = (name_node, type_node) {
             let type_name = self.get_node_text(name, content);
             let type_definition = self.parse_type_definition(&type_def_node, content)?;
-            
+
             let type_decl = TypeDeclNode {
                 name: type_name.clone(),
                 type_def: type_definition.clone(),
                 position: self.node_to_position(name, file_path),
                 docs: self.extract_documentation(type_spec, content),
             };
-            
+
             self.nodes.push(GoAstNode::TypeDecl(type_decl));
             self.type_defs.insert(type_name.clone(), type_definition);
         }
-        
+
         Ok(())
     }
 
@@ -394,7 +415,9 @@ impl GoAstParser {
             "pointer_type" => self.parse_pointer_type(type_node, content),
             "map_type" => self.parse_map_type(type_node, content),
             "slice_type" => self.parse_slice_type(type_node, content),
-            "type_identifier" => Ok(TypeDefinition::Basic(self.get_node_text(*type_node, content))),
+            "type_identifier" => Ok(TypeDefinition::Basic(
+                self.get_node_text(*type_node, content),
+            )),
             _ => Ok(TypeDefinition::Basic("unknown".to_string())),
         }
     }
@@ -404,7 +427,7 @@ impl GoAstParser {
         let mut fields = Vec::new();
         let mut embedded = Vec::new();
         let mut cursor = struct_node.walk();
-        
+
         // Find field list
         for child in struct_node.children(&mut cursor) {
             if child.kind() == "field_declaration_list" {
@@ -423,13 +446,13 @@ impl GoAstParser {
                 }
             }
         }
-        
+
         let struct_type = StructTypeNode {
             fields,
             embedded,
             position: self.node_to_position(*struct_node, &PathBuf::new()),
         };
-        
+
         Ok(TypeDefinition::Struct(struct_type))
     }
 
@@ -438,7 +461,7 @@ impl GoAstParser {
         let mut methods = Vec::new();
         let embedded = Vec::new();
         let mut cursor = interface_node.walk();
-        
+
         // Find method list
         for child in interface_node.children(&mut cursor) {
             if child.kind() == "method_spec_list" {
@@ -450,45 +473,51 @@ impl GoAstParser {
                 }
             }
         }
-        
+
         let interface_type = InterfaceTypeNode {
             methods,
             embedded,
             position: self.node_to_position(*interface_node, &PathBuf::new()),
         };
-        
+
         Ok(TypeDefinition::Interface(interface_type))
     }
 
     /// Parse array type
     fn parse_array_type(&self, array_node: &Node, content: &str) -> Result<TypeDefinition> {
         let mut cursor = array_node.walk();
-        
+
         for child in array_node.children(&mut cursor) {
             if child.kind() == "element_type" {
                 let element_type = self.parse_type_definition(&child, content)?;
                 return Ok(TypeDefinition::Array(Box::new(element_type)));
             }
         }
-        
-        Ok(TypeDefinition::Array(Box::new(TypeDefinition::Basic("unknown".to_string()))))
+
+        Ok(TypeDefinition::Array(Box::new(TypeDefinition::Basic(
+            "unknown".to_string(),
+        ))))
     }
 
     /// Parse pointer type
     fn parse_pointer_type(&self, pointer_node: &Node, content: &str) -> Result<TypeDefinition> {
         let mut cursor = pointer_node.walk();
-        
+
         for child in pointer_node.children(&mut cursor) {
             if child.kind() == "base_type" {
                 let base_type = self.parse_type_definition(&child, content)?;
                 return Ok(TypeDefinition::Pointer(Box::new(base_type)));
             } else if child.kind() == "type_identifier" {
                 let type_name = self.get_node_text(child, content);
-                return Ok(TypeDefinition::Pointer(Box::new(TypeDefinition::Basic(type_name))));
+                return Ok(TypeDefinition::Pointer(Box::new(TypeDefinition::Basic(
+                    type_name,
+                ))));
             }
         }
-        
-        Ok(TypeDefinition::Pointer(Box::new(TypeDefinition::Basic("unknown".to_string()))))
+
+        Ok(TypeDefinition::Pointer(Box::new(TypeDefinition::Basic(
+            "unknown".to_string(),
+        ))))
     }
 
     /// Parse map type
@@ -496,7 +525,7 @@ impl GoAstParser {
         let mut key_type = None;
         let mut value_type = None;
         let mut cursor = map_node.walk();
-        
+
         for child in map_node.children(&mut cursor) {
             match child.kind() {
                 "key_type" => key_type = Some(self.parse_type_definition(&child, content)?),
@@ -504,25 +533,27 @@ impl GoAstParser {
                 _ => {}
             }
         }
-        
+
         let key = key_type.unwrap_or(TypeDefinition::Basic("string".to_string()));
         let value = value_type.unwrap_or(TypeDefinition::Basic("unknown".to_string()));
-        
+
         Ok(TypeDefinition::Map(Box::new(key), Box::new(value)))
     }
 
     /// Parse slice type
     fn parse_slice_type(&self, slice_node: &Node, content: &str) -> Result<TypeDefinition> {
         let mut cursor = slice_node.walk();
-        
+
         for child in slice_node.children(&mut cursor) {
             if child.kind() == "element_type" {
                 let element_type = self.parse_type_definition(&child, content)?;
                 return Ok(TypeDefinition::Slice(Box::new(element_type)));
             }
         }
-        
-        Ok(TypeDefinition::Slice(Box::new(TypeDefinition::Basic("unknown".to_string()))))
+
+        Ok(TypeDefinition::Slice(Box::new(TypeDefinition::Basic(
+            "unknown".to_string(),
+        ))))
     }
 
     /// Parse field declaration
@@ -531,7 +562,7 @@ impl GoAstParser {
         let mut field_type = TypeDefinition::Basic("unknown".to_string());
         let mut tags = None;
         let mut cursor = field_decl.walk();
-        
+
         for child in field_decl.children(&mut cursor) {
             match child.kind() {
                 "field_identifier_list" => {
@@ -545,12 +576,16 @@ impl GoAstParser {
                     field_type = self.parse_type_definition(&child, content)?;
                 }
                 "raw_string_literal" | "interpreted_string_literal" => {
-                    tags = Some(self.get_node_text(child, content).trim_matches('"').to_string());
+                    tags = Some(
+                        self.get_node_text(child, content)
+                            .trim_matches('"')
+                            .to_string(),
+                    );
                 }
                 _ => {}
             }
         }
-        
+
         Ok(FieldNode {
             names,
             field_type,
@@ -566,7 +601,7 @@ impl GoAstParser {
         let mut params = Vec::new();
         let mut results = Vec::new();
         let mut cursor = method_spec.walk();
-        
+
         for child in method_spec.children(&mut cursor) {
             match child.kind() {
                 "field_identifier" => {
@@ -581,7 +616,7 @@ impl GoAstParser {
                 _ => {}
             }
         }
-        
+
         Ok(MethodNode {
             name,
             receiver: None, // Method specifications in interfaces don't have receivers
@@ -596,14 +631,14 @@ impl GoAstParser {
     fn parse_parameter_list(&self, param_list: &Node, content: &str) -> Result<Vec<FieldNode>> {
         let mut params = Vec::new();
         let mut cursor = param_list.walk();
-        
+
         for child in param_list.children(&mut cursor) {
             if child.kind() == "parameter_declaration" {
                 let param = self.parse_parameter_declaration(&child, content)?;
                 params.push(param);
             }
         }
-        
+
         Ok(params)
     }
 
@@ -612,7 +647,7 @@ impl GoAstParser {
         let mut names = Vec::new();
         let mut param_type = TypeDefinition::Basic("unknown".to_string());
         let mut cursor = param_decl.walk();
-        
+
         for child in param_decl.children(&mut cursor) {
             match child.kind() {
                 "identifier" => {
@@ -624,7 +659,7 @@ impl GoAstParser {
                 _ => {}
             }
         }
-        
+
         Ok(FieldNode {
             names,
             field_type: param_type,
@@ -638,21 +673,26 @@ impl GoAstParser {
     fn parse_result_list(&self, result_list: &Node, content: &str) -> Result<Vec<FieldNode>> {
         let mut results = Vec::new();
         let mut cursor = result_list.walk();
-        
+
         for child in result_list.children(&mut cursor) {
             if child.kind() == "parameter_declaration" {
                 let result = self.parse_parameter_declaration(&child, content)?;
                 results.push(result);
             }
         }
-        
+
         Ok(results)
     }
 
     /// Extract function declarations from AST
-    fn extract_function_declarations(&mut self, root_node: &Node, file_path: &Path, content: &str) -> Result<()> {
+    fn extract_function_declarations(
+        &mut self,
+        root_node: &Node,
+        file_path: &Path,
+        content: &str,
+    ) -> Result<()> {
         let mut cursor = root_node.walk();
-        
+
         for node in root_node.children(&mut cursor) {
             if node.kind() == "function_declaration" {
                 self.process_function_declaration(&node, file_path, content)?;
@@ -660,18 +700,23 @@ impl GoAstParser {
                 self.process_method_declaration(&node, file_path, content)?;
             }
         }
-        
+
         Ok(())
     }
 
     /// Process a function declaration node
-    fn process_function_declaration(&mut self, func_decl_node: &Node, file_path: &Path, content: &str) -> Result<()> {
+    fn process_function_declaration(
+        &mut self,
+        func_decl_node: &Node,
+        file_path: &Path,
+        content: &str,
+    ) -> Result<()> {
         let mut name = String::new();
         let mut receiver = None;
         let mut params = Vec::new();
         let mut results = Vec::new();
         let mut cursor = func_decl_node.walk();
-        
+
         for child in func_decl_node.children(&mut cursor) {
             match child.kind() {
                 "identifier" => {
@@ -680,19 +725,20 @@ impl GoAstParser {
                 "parameter_list" => {
                     let mut param_cursor = child.walk();
                     let mut first_param = true;
-                    
+
                     for param in child.children(&mut param_cursor) {
                         if param.kind() == "parameter_declaration" {
                             if first_param {
                                 // Check if this is a receiver parameter
-                                let receiver_info = self.parse_receiver_parameter(&param, content)?;
+                                let receiver_info =
+                                    self.parse_receiver_parameter(&param, content)?;
                                 if receiver_info.is_some() {
                                     receiver = receiver_info;
                                     first_param = false;
                                     continue;
                                 }
                             }
-                            
+
                             let param_node = self.parse_parameter_declaration(&param, content)?;
                             params.push(param_node);
                             first_param = false;
@@ -705,7 +751,7 @@ impl GoAstParser {
                 _ => {}
             }
         }
-        
+
         // Only create a method node if there's a receiver
         if receiver.is_some() {
             let method_node = MethodNode {
@@ -716,21 +762,26 @@ impl GoAstParser {
                 docs: self.extract_documentation(func_decl_node, content),
                 position: self.node_to_position(*func_decl_node, file_path),
             };
-            
+
             self.nodes.push(GoAstNode::Method(method_node));
         }
-        
+
         Ok(())
     }
 
     /// Process a method declaration node
-    fn process_method_declaration(&mut self, method_decl_node: &Node, file_path: &Path, content: &str) -> Result<()> {
+    fn process_method_declaration(
+        &mut self,
+        method_decl_node: &Node,
+        file_path: &Path,
+        content: &str,
+    ) -> Result<()> {
         let mut name = String::new();
         let mut receiver = None;
         let mut params = Vec::new();
         let mut results = Vec::new();
         let mut cursor = method_decl_node.walk();
-        
+
         for child in method_decl_node.children(&mut cursor) {
             match child.kind() {
                 "field_identifier" => {
@@ -746,7 +797,7 @@ impl GoAstParser {
                 _ => {}
             }
         }
-        
+
         // For method declarations, we need to parse the receiver from the parent context
         // The receiver is typically the first parameter in the method declaration
         // Let me check if there's a receiver parameter list
@@ -767,7 +818,7 @@ impl GoAstParser {
                 break;
             }
         }
-        
+
         // Create method node
         let method_node = MethodNode {
             name,
@@ -777,18 +828,22 @@ impl GoAstParser {
             docs: self.extract_documentation(method_decl_node, content),
             position: self.node_to_position(*method_decl_node, file_path),
         };
-        
+
         self.nodes.push(GoAstNode::Method(method_node));
-        
+
         Ok(())
     }
 
     /// Parse receiver parameter from a parameter declaration
-    fn parse_receiver_parameter(&self, param_decl: &Node, content: &str) -> Result<Option<TypeDefinition>> {
+    fn parse_receiver_parameter(
+        &self,
+        param_decl: &Node,
+        content: &str,
+    ) -> Result<Option<TypeDefinition>> {
         let mut names = Vec::new();
         let mut param_type = TypeDefinition::Basic("unknown".to_string());
         let mut cursor = param_decl.walk();
-        
+
         for child in param_decl.children(&mut cursor) {
             match child.kind() {
                 "identifier" => {
@@ -808,7 +863,7 @@ impl GoAstParser {
                 _ => {}
             }
         }
-        
+
         // In Go, receivers are written as (t Type) or (Type)
         // The receiver is always a single parameter with a type
         // We identify it by checking if it has a valid type (not "unknown")
@@ -827,25 +882,30 @@ impl GoAstParser {
             }
             _ => {}
         }
-        
+
         Ok(None)
     }
 
     /// Extract imports from AST
     fn extract_imports(&mut self, root_node: &Node, file_path: &Path, content: &str) -> Result<()> {
         let mut cursor = root_node.walk();
-        
+
         for node in root_node.children(&mut cursor) {
             if node.kind() == "import_declaration" {
                 self.process_import_declaration(&node, file_path, content)?;
             }
         }
-        
+
         Ok(())
     }
 
     /// Process import declaration
-    fn process_import_declaration(&mut self, import_decl: &Node, file_path: &Path, content: &str) -> Result<()> {
+    fn process_import_declaration(
+        &mut self,
+        import_decl: &Node,
+        file_path: &Path,
+        content: &str,
+    ) -> Result<()> {
         for child in import_decl.children(&mut import_decl.walk()) {
             if child.kind() == "import_spec_list" {
                 for import_spec in child.children(&mut child.walk()) {
@@ -855,47 +915,60 @@ impl GoAstParser {
                 }
             }
         }
-        
+
         Ok(())
     }
 
     /// Process import specification
-    fn process_import_spec(&mut self, import_spec: &Node, file_path: &Path, content: &str) -> Result<()> {
+    fn process_import_spec(
+        &mut self,
+        import_spec: &Node,
+        file_path: &Path,
+        content: &str,
+    ) -> Result<()> {
         let mut path = String::new();
         let mut alias = None;
         let mut cursor = import_spec.walk();
-        
+
         for child in import_spec.children(&mut cursor) {
             match child.kind() {
                 "package_identifier" => {
                     alias = Some(self.get_node_text(child, content));
                 }
                 "interpreted_string_literal" => {
-                    path = self.get_node_text(child, content).trim_matches('"').to_string();
+                    path = self
+                        .get_node_text(child, content)
+                        .trim_matches('"')
+                        .to_string();
                 }
                 _ => {}
             }
         }
-        
+
         let import_node = ImportNode {
             path,
             alias,
             position: self.node_to_position(*import_spec, file_path),
         };
-        
+
         self.nodes.push(GoAstNode::Import(import_node));
         Ok(())
     }
 
     /// Extract comments from AST
-    fn extract_comments(&mut self, _root_node: &Node, file_path: &Path, content: &str) -> Result<()> {
+    fn extract_comments(
+        &mut self,
+        _root_node: &Node,
+        file_path: &Path,
+        content: &str,
+    ) -> Result<()> {
         // Tree-sitter doesn't include comments in the AST by default
         // We'll extract them from the source text
         let lines: Vec<&str> = content.lines().collect();
-        
+
         for (line_num, line) in lines.iter().enumerate() {
             let trimmed = line.trim();
-            
+
             if trimmed.starts_with("//") {
                 let comment = CommentNode {
                     text: trimmed[2..].trim().to_string(),
@@ -910,7 +983,7 @@ impl GoAstParser {
                 self.nodes.push(GoAstNode::Comment(comment));
             } else if trimmed.starts_with("/*") && trimmed.ends_with("*/") {
                 let comment = CommentNode {
-                    text: trimmed[2..trimmed.len()-2].trim().to_string(),
+                    text: trimmed[2..trimmed.len() - 2].trim().to_string(),
                     comment_type: CommentType::Block,
                     position: Position {
                         file: file_path.to_path_buf(),
@@ -922,7 +995,7 @@ impl GoAstParser {
                 self.nodes.push(GoAstNode::Comment(comment));
             }
         }
-        
+
         Ok(())
     }
 
@@ -930,27 +1003,27 @@ impl GoAstParser {
     fn extract_documentation(&self, node: &Node, content: &str) -> Vec<String> {
         let mut docs = Vec::new();
         let node_start = node.start_byte();
-        
+
         // Look for comments before the node
         let lines: Vec<&str> = content.lines().collect();
         let mut current_byte = 0;
-        
+
         for (_line_num, line) in lines.iter().enumerate() {
             let line_bytes = line.len() + 1; // +1 for newline
             let next_byte = current_byte + line_bytes;
-            
+
             if next_byte > node_start {
                 break;
             }
-            
+
             let trimmed = line.trim();
             if trimmed.starts_with("//") && !trimmed.starts_with("//go:") {
                 docs.push(trimmed[2..].trim().to_string());
             }
-            
+
             current_byte = next_byte;
         }
-        
+
         docs
     }
 
@@ -1429,21 +1502,22 @@ type UserService interface {
 
         let schemas = parser.extract_schemas();
         assert_eq!(schemas.len(), 3); // User, UserSettings, UserService
-        
+
         // Check that we have the expected types
         let schema_names: Vec<&str> = schemas.iter().map(|s| s.name.as_str()).collect();
         assert!(schema_names.contains(&"User"));
         assert!(schema_names.contains(&"UserSettings"));
         assert!(schema_names.contains(&"UserService"));
-        
+
         // Check package info
         let package_info = parser.get_package_info();
         assert!(package_info.is_some());
         assert_eq!(package_info.unwrap().name, "main");
-        
+
         // Check imports
         let nodes = parser.get_nodes();
-        let imports: Vec<&ImportNode> = nodes.iter()
+        let imports: Vec<&ImportNode> = nodes
+            .iter()
             .filter_map(|node| {
                 if let GoAstNode::Import(import) = node {
                     Some(import)
@@ -1452,10 +1526,12 @@ type UserService interface {
                 }
             })
             .collect();
-        
+
         assert_eq!(imports.len(), 2);
         assert!(imports.iter().any(|i| i.path == "time"));
-        assert!(imports.iter().any(|i| i.path == "k8s.io/apimachinery/pkg/apis/meta/v1"));
+        assert!(imports
+            .iter()
+            .any(|i| i.path == "k8s.io/apimachinery/pkg/apis/meta/v1"));
     }
 
     #[tokio::test]
@@ -1485,7 +1561,8 @@ type User struct {
             .unwrap();
 
         let nodes = parser.get_nodes();
-        let comments: Vec<&CommentNode> = nodes.iter()
+        let comments: Vec<&CommentNode> = nodes
+            .iter()
             .filter_map(|node| {
                 if let GoAstNode::Comment(comment) = node {
                     Some(comment)
@@ -1494,10 +1571,14 @@ type User struct {
                 }
             })
             .collect();
-        
+
         assert!(!comments.is_empty());
-        assert!(comments.iter().any(|c| c.text.contains("This is a line comment")));
-        assert!(comments.iter().any(|c| c.text.contains("This is a block comment")));
+        assert!(comments
+            .iter()
+            .any(|c| c.text.contains("This is a line comment")));
+        assert!(comments
+            .iter()
+            .any(|c| c.text.contains("This is a block comment")));
     }
 
     #[tokio::test]
@@ -1526,7 +1607,7 @@ type User struct {
         let plugin = GoAstPlugin::new(config.clone());
         let temp_dir = TempDir::new().unwrap();
         let test_file = temp_dir.path().join("test.go");
-        
+
         let test_content = r#"
 package main
 
@@ -1535,7 +1616,7 @@ type TestStruct struct {
     Age  int    `json:"age,omitempty"`
 }
 "#;
-        
+
         tokio::fs::write(&test_file, &test_content).await.unwrap();
 
         let context = PluginContext::new(
@@ -1545,7 +1626,7 @@ type TestStruct struct {
         );
 
         let result = plugin.process_source(&test_file, &context).await.unwrap();
-        
+
         assert_eq!(result.schemas.len(), 1);
         assert_eq!(result.schemas[0].name, "TestStruct");
         assert_eq!(result.statistics.files_processed, 1);

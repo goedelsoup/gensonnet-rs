@@ -63,7 +63,7 @@ async fn test_cleanup_dry_run_with_different_ages() {
     assert_eq!(result_1_hour.max_age_hours, 1);
     assert_eq!(result_24_hours.max_age_hours, 24);
     assert_eq!(result_168_hours.max_age_hours, 168);
-    
+
     assert_eq!(result_1_hour.total_sources_removed, 0);
     assert_eq!(result_24_hours.total_sources_removed, 0);
     assert_eq!(result_168_hours.total_sources_removed, 0);
@@ -96,7 +96,7 @@ async fn test_cleanup_dry_run_result_structure() {
     assert!(result.max_age_hours > 0);
     assert_eq!(result.stale_sources.len(), result.total_sources_removed);
     assert_eq!(result.stale_files.len(), result.total_files_removed);
-    
+
     // Verify lockfile path
     assert_eq!(result.lockfile_path, PathBuf::from("jsonnet-gen.lock"));
 }

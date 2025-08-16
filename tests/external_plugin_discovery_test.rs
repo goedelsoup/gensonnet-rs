@@ -64,17 +64,24 @@ config:
 
     // Get plugin information
     let plugins = app.get_plugin_info().await.unwrap();
-    
+
     // Should have at least the built-in plugins
     assert!(!plugins.is_empty(), "Should have at least built-in plugins");
-    
 
-    
     // Check that we have the expected built-in plugins
     let plugin_ids: Vec<_> = plugins.iter().map(|p| &p.id).collect();
-    assert!(plugin_ids.contains(&&"go-ast:builtin".to_string()), "Should have go-ast plugin");
-    assert!(plugin_ids.contains(&&"crd:builtin".to_string()), "Should have crd plugin");
-    assert!(plugin_ids.contains(&&"openapi:builtin".to_string()), "Should have openapi plugin");
+    assert!(
+        plugin_ids.contains(&&"go-ast:builtin".to_string()),
+        "Should have go-ast plugin"
+    );
+    assert!(
+        plugin_ids.contains(&&"crd:builtin".to_string()),
+        "Should have crd plugin"
+    );
+    assert!(
+        plugin_ids.contains(&&"openapi:builtin".to_string()),
+        "Should have openapi plugin"
+    );
 }
 
 #[tokio::test]
@@ -102,13 +109,19 @@ async fn test_plugin_discovery_disabled() {
 
     // Initialize plugins (this should skip external plugin discovery)
     let result = app.initialize_plugins().await;
-    assert!(result.is_ok(), "Plugin initialization should succeed even with discovery disabled");
+    assert!(
+        result.is_ok(),
+        "Plugin initialization should succeed even with discovery disabled"
+    );
 
     // Get plugin information
     let plugins = app.get_plugin_info().await.unwrap();
-    
+
     // Should still have built-in plugins
-    assert!(!plugins.is_empty(), "Should have built-in plugins even with discovery disabled");
+    assert!(
+        !plugins.is_empty(),
+        "Should have built-in plugins even with discovery disabled"
+    );
 }
 
 #[tokio::test]
@@ -140,5 +153,8 @@ async fn test_plugin_directory_expansion() {
 
     // Initialize plugins (this should handle the directory expansion gracefully)
     let result = app.initialize_plugins().await;
-    assert!(result.is_ok(), "Plugin initialization should handle non-existent directories gracefully");
+    assert!(
+        result.is_ok(),
+        "Plugin initialization should handle non-existent directories gracefully"
+    );
 }

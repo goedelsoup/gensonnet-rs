@@ -192,7 +192,6 @@ impl GitManager {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
 
     #[test]
     fn test_hash_repo_url() {

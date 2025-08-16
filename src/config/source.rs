@@ -173,7 +173,9 @@ impl GoAstSource {
         }
 
         if self.include_patterns.is_empty() {
-            return Err(anyhow!("Go AST source must have at least one include pattern"));
+            return Err(anyhow!(
+                "Go AST source must have at least one include pattern"
+            ));
         }
 
         Ok(())
@@ -224,7 +226,9 @@ impl OpenApiSource {
         }
 
         if self.include_patterns.is_empty() {
-            return Err(anyhow!("OpenAPI source must have at least one include pattern"));
+            return Err(anyhow!(
+                "OpenAPI source must have at least one include pattern"
+            ));
         }
 
         // Validate OpenAPI version if specified
