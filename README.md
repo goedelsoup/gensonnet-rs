@@ -617,24 +617,6 @@ See [.github/README.md](.github/README.md) for detailed workflow documentation.
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## Roadmap
-
-### Phase 1: Foundation ✅
-
-### Phase 2: Advanced CRD Processing ✅
-
-### Phase 3: Advanced Features ✅
-
-### Phase 4: Plugin Architecture ✅
-
-### Phase 5: Future Extensibility 🚧
-- [x] OpenAPI specification support
-- [ ] Webhook integration
-- [ ] Web UI for configuration management
-- [ ] CI/CD integration (GitHub Actions, GitLab CI)
-- [ ] Performance monitoring and analytics
-- [ ] Template customization system
-
 ## Examples
 
 See the [examples/](examples/) directory for complete working examples.
