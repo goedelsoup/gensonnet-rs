@@ -376,8 +376,7 @@ impl JsonnetGen {
                 let schemas = self
                     .crd_parser
                     .parse_from_directory(&repo_path, &crd_source.filters)?;
-                let generator_schemas: Vec<_> =
-                    schemas.iter().map(convert_crd_schema).collect();
+                let generator_schemas: Vec<_> = schemas.iter().map(convert_crd_schema).collect();
                 self.generator
                     .generate_crd_library(&generator_schemas, &crd_source.output_path)
                     .await
