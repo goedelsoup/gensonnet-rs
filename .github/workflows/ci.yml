@@ -15,14 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        rust: [1.70, stable, beta]
+        rust: [1.70, stable]
         include:
           - rust: 1.70
             cache-key: '1.70'
           - rust: stable
             cache-key: stable
-          - rust: beta
-            cache-key: beta
 
     steps:
     - uses: actions/checkout@v4
