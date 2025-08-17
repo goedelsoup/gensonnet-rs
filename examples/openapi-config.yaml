@@ -27,3 +27,16 @@ output:
 generation:
   fail_fast: false
   deep_merge_strategy: "default"
+
+plugins:
+  plugin_directories:
+    - "./plugins"
+  enable_external_discovery: true
+  cache_directory: "~/.cache/gensonnet/plugins"
+  validation:
+    validate_signatures: false
+    check_compatibility: true
+    allowed_sources:
+      - "local"
+      - "registry"
+    blocked_sources: []
