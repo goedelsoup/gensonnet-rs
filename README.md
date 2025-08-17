@@ -58,6 +58,22 @@ cargo install --path .
    jsonnet-gen init --example
    ```
 
+## Documentation
+
+📚 **Complete documentation is available at: [https://goedelsoup.github.io/gensonnet-rs](https://goedelsoup.github.io/gensonnet-rs)**
+
+The documentation site includes:
+- Getting started guide
+- Plugin documentation
+- API reference
+- Examples and tutorials
+- Best practices
+
+**Local Development:**
+```bash
+just docs-dev  # Start local development server
+```
+
 2. **Edit the configuration** (`.jsonnet-gen.yaml`):
    ```yaml
    version: "1.0"
@@ -604,36 +620,12 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Roadmap
 
 ### Phase 1: Foundation ✅
-- [x] CLI argument parsing and configuration loading
-- [x] XDG directory management
-- [x] Git repository handling and caching
-- [x] Basic CRD YAML parsing
 
 ### Phase 2: Advanced CRD Processing ✅
-- [x] OpenAPI v3 schema extraction
-- [x] Validation rule interpretation
-- [x] Jsonnet code generation for basic types
-- [x] File organization and output
-- [x] Complex validation rules (patterns, enums, ranges)
-- [x] Schema analysis and type inference
 
 ### Phase 3: Advanced Features ✅
-- [x] Lockfile generation and verification
-- [x] Incremental generation (only changed sources)
-- [x] Error recovery and partial generation
-- [x] Dependency tracking and topological sorting
-- [x] Cache management and staleness detection
-- [x] Parallel processing support
-- [x] Advanced CLI commands
 
 ### Phase 4: Plugin Architecture ✅
-- [x] Extensible plugin system with trait-based interfaces
-- [x] Go AST processing and schema extraction
-- [x] Plugin registry and discovery system
-- [x] Plugin lifecycle management
-- [x] Built-in plugin framework
-- [x] Plugin manifest system
-- [x] Plugin CLI commands
 
 ### Phase 5: Future Extensibility 🚧
 - [x] OpenAPI specification support

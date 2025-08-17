@@ -298,7 +298,7 @@ async fn generate_test_report(args: ReportArgs) -> Result<()> {
         tokio::fs::write(output_path, report_content).await?;
         println!("Report generated successfully!");
     } else {
-        println!("{}", report_content);
+        println!("{report_content}");
     }
 
     Ok(())
@@ -444,21 +444,21 @@ fn create_generic_test_cases(plugin_id: &str) -> Vec<PluginTestCase> {
     vec![
         utils::create_test_case(
             "basic_initialization",
-            &format!("Test basic {} plugin initialization", plugin_id),
+            &format!("Test basic {plugin_id} plugin initialization"),
             TestCaseType::Initialization,
             vec![],
             true,
         ),
         utils::create_test_case(
             "source_processing",
-            &format!("Test {} source processing", plugin_id),
+            &format!("Test {plugin_id} source processing"),
             TestCaseType::SourceProcessing,
             vec![std::path::PathBuf::from("test.txt")],
             true,
         ),
         utils::create_test_case(
             "schema_extraction",
-            &format!("Test {} schema extraction", plugin_id),
+            &format!("Test {plugin_id} schema extraction"),
             TestCaseType::SchemaExtraction,
             vec![std::path::PathBuf::from("test.txt")],
             true,

@@ -1,0 +1,18 @@
+[package]
+name = "gensonnet-plugin"
+version = "0.1.0"
+edition = "2021"
+description = "Common plugin infrastructure for gensonnet"
+license = "MIT"
+
+[dependencies]
+anyhow = "1.0"
+async-trait = "0.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
+tokio = { version = "1.0", features = ["sync", "fs", "macros", "rt-multi-thread"] }
+tracing = "0.1"
+chrono = { version = "0.4", features = ["serde"] }
+
+[dev-dependencies]
+tempfile = "3.0"

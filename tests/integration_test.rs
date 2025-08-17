@@ -1,4 +1,4 @@
-use jsonnet_gen::lockfile::LockfileManager;
+use jsonnet_gen::LockfileManager;
 use jsonnet_gen::{Config, CrdParser};
 use std::path::PathBuf;
 use tempfile::TempDir;
@@ -97,8 +97,8 @@ fn test_crd_schema_validation() {
         kind: "test".to_string(),
         schema: serde_yaml::Value::Null,
         source_path: PathBuf::from("test.yaml"),
-        validation_rules: jsonnet_gen::crd::ValidationRules::default(),
-        schema_analysis: jsonnet_gen::crd::SchemaAnalysis::default(),
+        validation_rules: jsonnet_gen::ValidationRules::default(),
+        schema_analysis: jsonnet_gen::SchemaAnalysis::default(),
     };
 
     assert_eq!(schema.kind(), "test");

@@ -1,3 +1,13 @@
+[workspace]
+members = [
+    ".",
+    "crates/generator",
+    "crates/lockfile",
+    "crates/crd",
+    "crates/plugin",
+    "crates/plugin-ast",
+]
+
 [package]
 name = "jsonnet-gen"
 version = "0.1.0"
@@ -47,6 +57,18 @@ hex = "0.4"
 glob = "0.3"
 shellexpand = "3.1"
 html-escape = "0.2"
+
+# Generator crate
+jsonnet-generator = { path = "crates/generator" }
+
+# Lockfile crate
+jsonnet-lockfile = { path = "crates/lockfile" }
+
+# CRD crate
+jsonnet-crd = { path = "crates/crd" }
+
+# Plugin crate
+gensonnet-plugin = { path = "crates/plugin" }
 
 # Tree-sitter for Go AST parsing
 tree-sitter = "0.20"

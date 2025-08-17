@@ -197,7 +197,7 @@ async fn run_list(args: ListArgs) -> Result<()> {
             plugin
                 .capabilities
                 .iter()
-                .any(|cap| format!("{:?}", cap).to_lowercase() == capability.to_lowercase())
+                .any(|cap| format!("{cap:?}").to_lowercase() == capability.to_lowercase())
         });
     }
 
@@ -298,14 +298,14 @@ async fn run_install(args: InstallArgs) -> Result<()> {
         .install_plugin(
             &args.source,
             args.version.as_deref(),
-            args.target_dir.as_ref().map(|v| &**v),
+            args.target_dir.as_deref(),
         )
         .await
     {
         Ok(()) => {
             println!("Plugin installed successfully from: {}", args.source);
             if let Some(version) = args.version {
-                println!("Version: {}", version);
+                println!("Version: {version}");
             }
             if let Some(target_dir) = args.target_dir {
                 println!("Installed to: {}", target_dir.display());

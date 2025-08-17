@@ -3,11 +3,18 @@ ignorePaths: []
 dictionaryDefinitions: []
 dictionaries: []
 words:
+  - chrono
   - clippy
   - crds
   - gensonnet
   - jsonnet
   - justfile
   - libsonnet
+  - reqwest
+  - rstest
+  - serde
+  - shellexpand
+  - thiserror
+  - walkdir
 ignoreWords: []
 import: []

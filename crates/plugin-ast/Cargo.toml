@@ -1,0 +1,18 @@
+[package]
+name = "gensonnet-plugin-ast"
+version = "0.1.0"
+edition = "2021"
+description = "Abstract AST processing plugin infrastructure for gensonnet"
+license = "MIT"
+
+[dependencies]
+gensonnet-plugin = { path = "../plugin" }
+anyhow = "1.0"
+async-trait = "0.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
+tokio = { version = "1.0", features = ["sync", "fs", "macros", "rt-multi-thread"] }
+tracing = "0.1"
+
+[dev-dependencies]
+tempfile = "3.0"

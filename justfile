@@ -114,6 +114,49 @@ bench:
 doc:
     cargo doc --no-deps --open
 
+# Documentation site commands
+docs-dev:
+    @echo "Starting documentation development server..."
+    @cd book && export BASE_URL="http://127.0.0.1:1111" && zola serve --interface 127.0.0.1 --port 1111 --open
+
+docs-build:
+    @echo "Building documentation for production..."
+    @cd book && export BASE_URL="https://goedelsoup.github.io/gensonnet-rs" && zola build
+    @echo "Build complete! Site generated in 'book/public' directory"
+
+docs-clean:
+    @echo "Cleaning documentation build artifacts..."
+    @cd book && rm -rf public
+    @echo "Clean complete!"
+
+docs-check:
+    @echo "Checking documentation site configuration..."
+    @cd book && zola check
+
+docs-switch-dev:
+    @echo "Switching to development configuration..."
+    @cd book && cp config.dev.toml config.toml
+    @echo "✅ Development configuration activated"
+
+docs-switch-prod:
+    @echo "Switching to production configuration..."
+    @cd book && cp config.prod.toml config.toml
+    @echo "✅ Production configuration activated"
+
+docs-help:
+    @echo "Documentation site commands:"
+    @echo "  docs-dev        - Start development server"
+    @echo "  docs-build      - Build for production"
+    @echo "  docs-clean      - Clean build artifacts"
+    @echo "  docs-check      - Check site configuration"
+    @echo "  docs-switch-dev - Switch to development config"
+    @echo "  docs-switch-prod- Switch to production config"
+    @echo "  docs-workflow   - Complete documentation workflow"
+
+# Complete documentation workflow
+docs-workflow: docs-clean docs-check docs-build
+    @echo "Documentation workflow complete!"
+
 # Check for security vulnerabilities
 audit:
     cargo audit
@@ -181,3 +224,11 @@ status:
 help:
     @echo "Available tasks:"
     @just --list
+    @echo ""
+    @echo "Documentation site commands:"
+    @echo "  docs-dev        - Start development server"
+    @echo "  docs-build      - Build for production"
+    @echo "  docs-clean      - Clean build artifacts"
+    @echo "  docs-check      - Check site configuration"
+    @echo "  docs-switch-dev - Switch to development config"
+    @echo "  docs-switch-prod- Switch to production config"

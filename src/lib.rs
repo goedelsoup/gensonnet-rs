@@ -5,18 +5,16 @@
 
 pub mod cli;
 pub mod config;
-pub mod crd;
-pub mod generator;
 pub mod git;
-pub mod lockfile;
 pub mod plugin;
 pub mod utils;
 
-pub use config::{Config, GenerationConfig, OutputConfig, Source};
-pub use crd::{CrdParser, CrdSchema, SchemaAnalysis, ValidationRules};
-pub use generator::{GenerationResult, JsonnetGenerator, SourceResult};
+pub use config::{Config, GenerationConfig, Source};
 pub use git::GitManager;
-pub use lockfile::{IncrementalPlan, Lockfile, LockfileEntry, LockfileManager};
+pub use jsonnet_crd::{CrdParser, CrdSchema, SchemaAnalysis, ValidationRules};
+pub use jsonnet_generator::config::OutputConfig;
+pub use jsonnet_generator::{GenerationResult, JsonnetGenerator, SourceResult};
+pub use jsonnet_lockfile::{IncrementalPlan, Lockfile, LockfileEntry, LockfileManager};
 pub use plugin::{ExtractedSchema, PluginConfig, PluginContext, PluginManager, PluginResult};
 
 use anyhow::Result;
@@ -246,7 +244,7 @@ impl JsonnetGen {
             sources_processed: results.len(),
             total_sources: self.config.sources.len(),
             results: results.clone(),
-            statistics: GenerationStatistics {
+            statistics: jsonnet_generator::result::GenerationStatistics {
                 total_processing_time_ms: generation_time.as_millis() as u64,
                 sources_processed: results.len(),
                 files_generated: results.iter().map(|r| r.files_generated).sum(),
@@ -378,8 +376,10 @@ impl JsonnetGen {
                 let schemas = self
                     .crd_parser
                     .parse_from_directory(&repo_path, &crd_source.filters)?;
+                let generator_schemas: Vec<_> =
+                    schemas.iter().map(convert_crd_schema).collect();
                 self.generator
-                    .generate_crd_library(&schemas, &crd_source.output_path)
+                    .generate_crd_library(&generator_schemas, &crd_source.output_path)
                     .await
             }
             Source::GoAst(go_ast_source) => {
@@ -528,7 +528,7 @@ impl JsonnetGen {
                                 glob::glob(&exclude_glob.to_string_lossy())
                             {
                                 exclude_entries.any(|exclude_entry| {
-                                    exclude_entry.map_or(false, |exclude_path| exclude_path == path)
+                                    exclude_entry.is_ok_and(|exclude_path| exclude_path == path)
                                 })
                             } else {
                                 false
@@ -777,14 +777,14 @@ impl JsonnetGen {
         // Update files
         for source_result in &result.results {
             for file_path in self.get_generated_files(&source_result.output_path).await? {
-                if let Ok(checksum) = lockfile::FileChecksum::from_file(&file_path) {
+                if let Ok(checksum) = jsonnet_lockfile::FileChecksum::from_file(&file_path) {
                     lockfile.add_file(file_path, checksum);
                 }
             }
         }
 
         // Update statistics
-        lockfile.statistics = lockfile::GenerationStatistics {
+        lockfile.statistics = jsonnet_lockfile::GenerationStatistics {
             total_processing_time_ms: result.statistics.total_processing_time_ms,
             sources_processed: result.statistics.sources_processed,
             files_generated: result.statistics.files_generated,
@@ -832,7 +832,7 @@ impl JsonnetGen {
 
         // Initialize lockfile if it doesn't exist
         if !LockfileManager::default_path().exists() {
-            let lockfile = lockfile::Lockfile::new();
+            let lockfile = jsonnet_lockfile::Lockfile::new();
             self.lockfile_manager.save(&lockfile)?;
         }
 
@@ -1065,12 +1065,12 @@ impl JsonnetGen {
                                 );
                             }
                             Err(e) => {
-                                errors.push(format!("Failed to parse CRDs: {}", e));
+                                errors.push(format!("Failed to parse CRDs: {e}"));
                             }
                         }
                     }
                     Err(e) => {
-                        errors.push(format!("Failed to clone repository: {}", e));
+                        errors.push(format!("Failed to clone repository: {e}"));
                     }
                 }
             }
@@ -1086,7 +1086,7 @@ impl JsonnetGen {
                         );
                     }
                     Err(e) => {
-                        errors.push(format!("Failed to clone repository: {}", e));
+                        errors.push(format!("Failed to clone repository: {e}"));
                     }
                 }
             }
@@ -1106,7 +1106,7 @@ impl JsonnetGen {
                         );
                     }
                     Err(e) => {
-                        errors.push(format!("Failed to clone repository: {}", e));
+                        errors.push(format!("Failed to clone repository: {e}"));
                     }
                 }
             }
@@ -1131,8 +1131,8 @@ impl JsonnetGen {
     /// Group schemas by API version (helper method for dry run)
     fn group_schemas_by_version<'a>(
         &self,
-        schemas: &'a [crate::crd::CrdSchema],
-    ) -> std::collections::HashMap<String, Vec<&'a crate::crd::CrdSchema>> {
+        schemas: &'a [jsonnet_crd::CrdSchema],
+    ) -> std::collections::HashMap<String, Vec<&'a jsonnet_crd::CrdSchema>> {
         let mut grouped = std::collections::HashMap::new();
 
         for schema in schemas {
@@ -1331,7 +1331,7 @@ impl JsonnetGen {
                                 glob::glob(&exclude_glob.to_string_lossy())
                             {
                                 exclude_entries.any(|exclude_entry| {
-                                    exclude_entry.map_or(false, |exclude_path| exclude_path == path)
+                                    exclude_entry.is_ok_and(|exclude_path| exclude_path == path)
                                 })
                             } else {
                                 false
@@ -1429,18 +1429,7 @@ pub struct GenerationStatus {
     pub dependent_sources: Vec<String>,
     pub can_incremental: bool,
     pub estimated_time_ms: u64,
-    pub statistics: lockfile::GenerationStatistics,
-}
-
-/// Enhanced generation statistics
-#[derive(Debug, Clone)]
-pub struct GenerationStatistics {
-    pub total_processing_time_ms: u64,
-    pub sources_processed: usize,
-    pub files_generated: usize,
-    pub error_count: usize,
-    pub warning_count: usize,
-    pub cache_hit_rate: f64,
+    pub statistics: jsonnet_lockfile::GenerationStatistics,
 }
 
 /// Dry run result for a single source
@@ -1551,13 +1540,101 @@ impl Source {
     }
 }
 
-// Add missing fields to SourceResult
-impl SourceResult {
-    pub fn processing_time_ms(&self) -> u64 {
-        self.processing_time_ms
-    }
-
-    pub fn warnings(&self) -> &[String] {
-        &self.warnings
+/// Convert main project's CrdSchema to generator crate's CrdSchema
+fn convert_crd_schema(schema: &CrdSchema) -> jsonnet_generator::crd::CrdSchema {
+    jsonnet_generator::crd::CrdSchema {
+        name: schema.name.clone(),
+        group: schema.group.clone(),
+        version: schema.version.clone(),
+        api_version: schema.api_version.clone(),
+        kind: schema.kind.clone(),
+        schema: schema.schema.clone(),
+        source_path: schema.source_path.clone(),
+        validation_rules: jsonnet_generator::crd::ValidationRules {
+            min_length: schema.validation_rules.min_length,
+            max_length: schema.validation_rules.max_length,
+            pattern: schema.validation_rules.pattern.clone(),
+            minimum: schema.validation_rules.minimum,
+            maximum: schema.validation_rules.maximum,
+            exclusive_minimum: schema.validation_rules.exclusive_minimum,
+            exclusive_maximum: schema.validation_rules.exclusive_maximum,
+            multiple_of: schema.validation_rules.multiple_of,
+            enum_values: schema.validation_rules.enum_values.clone(),
+            format: schema.validation_rules.format.clone(),
+            description: schema.validation_rules.description.clone(),
+            default_value: schema.validation_rules.default_value.clone(),
+            additional_properties: schema.validation_rules.additional_properties.clone(),
+            items: schema.validation_rules.items.clone(),
+            properties: schema.validation_rules.properties.clone(),
+            required: schema.validation_rules.required.clone(),
+        },
+        schema_analysis: jsonnet_generator::crd::SchemaAnalysis {
+            schema_type: schema.schema_analysis.schema_type.clone(),
+            fields: schema
+                .schema_analysis
+                .fields
+                .iter()
+                .map(|(k, v)| {
+                    (
+                        k.clone(),
+                        jsonnet_generator::crd::FieldAnalysis {
+                            field_type: v.field_type.clone(),
+                            validation_rules: jsonnet_generator::crd::ValidationRules {
+                                min_length: v.validation_rules.min_length,
+                                max_length: v.validation_rules.max_length,
+                                pattern: v.validation_rules.pattern.clone(),
+                                minimum: v.validation_rules.minimum,
+                                maximum: v.validation_rules.maximum,
+                                exclusive_minimum: v.validation_rules.exclusive_minimum,
+                                exclusive_maximum: v.validation_rules.exclusive_maximum,
+                                multiple_of: v.validation_rules.multiple_of,
+                                enum_values: v.validation_rules.enum_values.clone(),
+                                format: v.validation_rules.format.clone(),
+                                description: v.validation_rules.description.clone(),
+                                default_value: v.validation_rules.default_value.clone(),
+                                additional_properties: v
+                                    .validation_rules
+                                    .additional_properties
+                                    .clone(),
+                                items: v.validation_rules.items.clone(),
+                                properties: v.validation_rules.properties.clone(),
+                                required: v.validation_rules.required.clone(),
+                            },
+                            nested_properties: v.nested_properties.clone(),
+                            array_items: v.array_items.clone(),
+                        },
+                    )
+                })
+                .collect(),
+            array_item_type: schema.schema_analysis.array_item_type.as_ref().map(|v| {
+                jsonnet_generator::crd::FieldAnalysis {
+                    field_type: v.field_type.clone(),
+                    validation_rules: jsonnet_generator::crd::ValidationRules {
+                        min_length: v.validation_rules.min_length,
+                        max_length: v.validation_rules.max_length,
+                        pattern: v.validation_rules.pattern.clone(),
+                        minimum: v.validation_rules.minimum,
+                        maximum: v.validation_rules.maximum,
+                        exclusive_minimum: v.validation_rules.exclusive_minimum,
+                        exclusive_maximum: v.validation_rules.exclusive_maximum,
+                        multiple_of: v.validation_rules.multiple_of,
+                        enum_values: v.validation_rules.enum_values.clone(),
+                        format: v.validation_rules.format.clone(),
+                        description: v.validation_rules.description.clone(),
+                        default_value: v.validation_rules.default_value.clone(),
+                        additional_properties: v.validation_rules.additional_properties.clone(),
+                        items: v.validation_rules.items.clone(),
+                        properties: v.validation_rules.properties.clone(),
+                        required: v.validation_rules.required.clone(),
+                    },
+                    nested_properties: v.nested_properties.clone(),
+                    array_items: v.array_items.clone(),
+                }
+            }),
+            one_of: schema.schema_analysis.one_of.clone(),
+            any_of: schema.schema_analysis.any_of.clone(),
+            all_of: schema.schema_analysis.all_of.clone(),
+            reference: schema.schema_analysis.reference.clone(),
+        },
     }
 }

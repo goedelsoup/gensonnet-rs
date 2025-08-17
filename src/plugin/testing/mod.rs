@@ -421,8 +421,7 @@ impl PluginTestRunner {
                             }
                             Err(e) => {
                                 warnings.push(format!(
-                                    "Failed to check if plugin can handle {:?}: {}",
-                                    test_file, e
+                                    "Failed to check if plugin can handle {test_file:?}: {e}"
                                 ));
                             }
                         }
@@ -443,7 +442,7 @@ impl PluginTestRunner {
                     })
                 }
                 Err(e) => {
-                    errors.push(format!("Failed to initialize plugin: {}", e));
+                    errors.push(format!("Failed to initialize plugin: {e}"));
                     Ok(TestOutput {
                         files: Vec::new(),
                         content: String::new(),
@@ -603,19 +602,16 @@ impl PluginTestRunner {
                 Ok(is_valid) => {
                     if is_valid {
                         valid_schemas += 1;
-                        validation_details.push(format!("✓ {}: Valid", schema_name));
+                        validation_details.push(format!("✓ {schema_name}: Valid"));
                     } else {
                         invalid_schemas += 1;
-                        validation_details.push(format!("✗ {}: Invalid", schema_name));
+                        validation_details.push(format!("✗ {schema_name}: Invalid"));
                     }
                 }
                 Err(e) => {
                     invalid_schemas += 1;
-                    validation_details.push(format!("✗ {}: Validation error - {}", schema_name, e));
-                    errors.push(format!(
-                        "Validation error for schema '{}': {}",
-                        schema_name, e
-                    ));
+                    validation_details.push(format!("✗ {schema_name}: Validation error - {e}"));
+                    errors.push(format!("Validation error for schema '{schema_name}': {e}"));
                 }
             }
         }
@@ -698,8 +694,8 @@ impl PluginTestRunner {
                 }
                 _ => {
                     // For other schema types, just check basic structure
-                    if !schema.content.as_mapping().is_some()
-                        && !schema.content.as_sequence().is_some()
+                    if schema.content.as_mapping().is_none()
+                        && schema.content.as_sequence().is_none()
                     {
                         is_valid = false;
                     }
@@ -761,23 +757,21 @@ impl PluginTestRunner {
                 Ok(handled_properly) => {
                     if handled_properly {
                         handled_errors += 1;
-                        error_details.push(format!("✓ {}: Error handled properly", scenario_name));
+                        error_details.push(format!("✓ {scenario_name}: Error handled properly"));
                     } else {
                         unhandled_errors += 1;
                         error_details
-                            .push(format!("✗ {}: Error not handled properly", scenario_name));
+                            .push(format!("✗ {scenario_name}: Error not handled properly"));
                         errors.push(format!(
-                            "Error scenario '{}' was not handled properly",
-                            scenario_name
+                            "Error scenario '{scenario_name}' was not handled properly"
                         ));
                     }
                 }
                 Err(e) => {
                     unhandled_errors += 1;
-                    error_details.push(format!("✗ {}: Test failed - {}", scenario_name, e));
+                    error_details.push(format!("✗ {scenario_name}: Test failed - {e}"));
                     errors.push(format!(
-                        "Error handling test failed for '{}': {}",
-                        scenario_name, e
+                        "Error handling test failed for '{scenario_name}': {e}"
                     ));
                 }
             }
@@ -1043,7 +1037,7 @@ impl PluginTestRunner {
         for (step_name, step_result) in workflow_steps {
             match step_result {
                 Ok(output) => {
-                    step_results.push(format!("✓ {}: Success", step_name));
+                    step_results.push(format!("✓ {step_name}: Success"));
 
                     // Collect schemas and files from each step
                     all_schemas.extend(output.schemas.clone());
@@ -1056,8 +1050,8 @@ impl PluginTestRunner {
                     integration_results.push((step_name.to_string(), Ok(output)));
                 }
                 Err(e) => {
-                    step_results.push(format!("✗ {}: Failed - {}", step_name, e));
-                    errors.push(format!("Integration step '{}' failed: {}", step_name, e));
+                    step_results.push(format!("✗ {step_name}: Failed - {e}"));
+                    errors.push(format!("Integration step '{step_name}' failed: {e}"));
                     integration_results.push((step_name.to_string(), Err(e)));
                 }
             }
@@ -1070,8 +1064,8 @@ impl PluginTestRunner {
                 step_results.push("✓ cleanup: Success".to_string());
             }
             Err(e) => {
-                step_results.push(format!("✗ cleanup: Failed - {}", e));
-                errors.push(format!("Integration cleanup failed: {}", e));
+                step_results.push(format!("✗ cleanup: Failed - {e}"));
+                errors.push(format!("Integration cleanup failed: {e}"));
             }
         }
 
@@ -1082,8 +1076,8 @@ impl PluginTestRunner {
                 step_results.push("✓ shared_state: Success".to_string());
             }
             Err(e) => {
-                step_results.push(format!("✗ shared_state: Failed - {}", e));
-                errors.push(format!("Shared state integration test failed: {}", e));
+                step_results.push(format!("✗ shared_state: Failed - {e}"));
+                errors.push(format!("Shared state integration test failed: {e}"));
             }
         }
 
@@ -1181,8 +1175,7 @@ impl PluginTestRunner {
             _ => {
                 // For unknown custom types, try to execute as a combination of existing tests
                 warnings.push(format!(
-                    "Unknown custom test type '{}', running basic tests",
-                    custom_type
+                    "Unknown custom test type '{custom_type}', running basic tests"
                 ));
                 self.test_basic_custom_execution(test_case, context, plugin_manager)
                     .await
@@ -1196,10 +1189,10 @@ impl PluginTestRunner {
                 Ok(output)
             }
             Err(e) => {
-                errors.push(format!("Custom test '{}' failed: {}", custom_type, e));
+                errors.push(format!("Custom test '{custom_type}' failed: {e}"));
                 Ok(TestOutput {
                     files: Vec::new(),
-                    content: format!("Custom test '{}' failed: {}", custom_type, e),
+                    content: format!("Custom test '{custom_type}' failed: {e}"),
                     schemas: Vec::new(),
                     warnings,
                     errors,
@@ -1231,14 +1224,14 @@ impl PluginTestRunner {
                 tokio::spawn(async move {
                     // Create a unique context for each task
                     let task_context = PluginContext::new(
-                        temp_dir.join(format!("task_{}", i)),
-                        temp_dir.join(format!("task_{}_output", i)),
+                        temp_dir.join(format!("task_{i}")),
+                        temp_dir.join(format!("task_{i}_output")),
                         context.config.clone(),
                     );
 
                     // Process the test case
                     let runner = PluginTestRunner::new(PluginTestSuite {
-                        name: format!("concurrent_task_{}", i),
+                        name: format!("concurrent_task_{i}"),
                         description: "Concurrent test task".to_string(),
                         plugin_config: context.config.clone(),
                         test_cases: vec![test_case.clone()],
@@ -1264,10 +1257,10 @@ impl PluginTestRunner {
                     all_errors.extend(output.errors);
                 }
                 Ok(Err(e)) => {
-                    all_errors.push(format!("Concurrent task failed: {}", e));
+                    all_errors.push(format!("Concurrent task failed: {e}"));
                 }
                 Err(e) => {
-                    all_errors.push(format!("Concurrent task panicked: {}", e));
+                    all_errors.push(format!("Concurrent task panicked: {e}"));
                 }
             }
         }
@@ -1327,12 +1320,11 @@ impl PluginTestRunner {
 
         let content = format!(
             "Stress Test Results:\n\
-            Iterations: {}\n\
-            Successes: {}\n\
-            Failures: {}\n\
-            Success Rate: {:.1}%\n\
-            Average Processing Time: {}ms",
-            iterations, success_count, failure_count, success_rate, avg_processing_time
+            Iterations: {iterations}\n\
+            Successes: {success_count}\n\
+            Failures: {failure_count}\n\
+            Success Rate: {success_rate:.1}%\n\
+            Average Processing Time: {avg_processing_time}ms"
         );
 
         Ok(TestOutput {
@@ -1388,11 +1380,10 @@ impl PluginTestRunner {
 
         let content = format!(
             "Memory Leak Detection Results:\n\
-            Iterations: {}\n\
-            Average Memory Growth: {} bytes\n\
-            Maximum Memory Growth: {} bytes\n\
-            Memory Growth Pattern: {:?}",
-            iterations, avg_growth, max_growth, memory_growth
+            Iterations: {iterations}\n\
+            Average Memory Growth: {avg_growth} bytes\n\
+            Maximum Memory Growth: {max_growth} bytes\n\
+            Memory Growth Pattern: {memory_growth:?}"
         );
 
         let warnings = if avg_growth > 1024 * 1024 {
@@ -1429,7 +1420,7 @@ impl PluginTestRunner {
         ];
 
         for (format, content) in &test_formats {
-            let temp_file = self.temp_dir.path().join(format!("test.{}", format));
+            let temp_file = self.temp_dir.path().join(format!("test.{format}"));
             std::fs::write(&temp_file, content)?;
 
             let result = plugin_manager.process_source(&temp_file, context).await;
@@ -1438,7 +1429,7 @@ impl PluginTestRunner {
                     // Format is supported
                 }
                 Err(e) => {
-                    compatibility_issues.push(format!("{} format: {}", format, e));
+                    compatibility_issues.push(format!("{format} format: {e}"));
                 }
             }
         }
@@ -1490,7 +1481,7 @@ impl PluginTestRunner {
             let temp_file = self
                 .temp_dir
                 .path()
-                .join(format!("security_test_{}.txt", test_name));
+                .join(format!("security_test_{test_name}.txt"));
             std::fs::write(&temp_file, malicious_input)?;
 
             let result = plugin_manager.process_source(&temp_file, context).await;
@@ -1498,8 +1489,7 @@ impl PluginTestRunner {
                 Ok(_) => {
                     // This might be a security issue - the plugin processed malicious input
                     security_issues.push(format!(
-                        "{}: Plugin processed potentially malicious input",
-                        test_name
+                        "{test_name}: Plugin processed potentially malicious input"
                     ));
                 }
                 Err(_) => {
@@ -1662,7 +1652,7 @@ impl PluginTestRunner {
             for command in &setup.commands {
                 if let Err(e) = self.execute_command(command).await {
                     // Log the error but don't fail the setup
-                    eprintln!("Setup command '{}' failed: {}", command, e);
+                    eprintln!("Setup command '{command}' failed: {e}");
                 }
             }
         }
@@ -1693,7 +1683,7 @@ impl PluginTestRunner {
             for command in &cleanup.commands {
                 if let Err(e) = self.execute_command(command).await {
                     // Log the error but don't fail the cleanup
-                    eprintln!("Cleanup command '{}' failed: {}", command, e);
+                    eprintln!("Cleanup command '{command}' failed: {e}");
                 }
             }
         }
@@ -1723,7 +1713,7 @@ impl PluginTestRunner {
             // On macOS, we can use the task_info API, but for simplicity we'll use a fallback
             // This is a rough approximation based on process info
             if let Ok(output) = std::process::Command::new("ps")
-                .args(&["-o", "rss=", "-p", &std::process::id().to_string()])
+                .args(["-o", "rss=", "-p", &std::process::id().to_string()])
                 .output()
             {
                 if let Ok(memory_str) = String::from_utf8(output.stdout) {

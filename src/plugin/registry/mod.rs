@@ -10,7 +10,7 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 use walkdir::WalkDir;
 
-use crate::plugin::*;
+use gensonnet_plugin::*;
 
 /// Plugin registry entry
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -164,6 +164,8 @@ impl PluginRegistry {
 
         match plugin_type {
             "go-ast" => {
+                // Note: In a real implementation, this would dynamically load the plugin
+                // For now, we'll keep the built-in registration
                 let factory = Box::new(crate::plugin::ast::GoAstPluginFactory);
                 self.plugin_manager
                     .register_factory("go-ast".to_string(), factory)
@@ -173,6 +175,8 @@ impl PluginRegistry {
                     .await?;
             }
             "crd" => {
+                // Note: In a real implementation, this would dynamically load the plugin
+                // For now, we'll keep the built-in registration
                 let factory = Box::new(crate::plugin::crd::CrdPluginFactory);
                 self.plugin_manager
                     .register_factory("crd".to_string(), factory)
@@ -182,6 +186,8 @@ impl PluginRegistry {
                     .await?;
             }
             "openapi" => {
+                // Note: In a real implementation, this would dynamically load the plugin
+                // For now, we'll keep the built-in registration
                 let factory = Box::new(crate::plugin::openapi::OpenApiPluginFactory);
                 self.plugin_manager
                     .register_factory("openapi".to_string(), factory)

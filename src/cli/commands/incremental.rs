@@ -79,14 +79,11 @@ pub async fn run(matches: &ArgMatches) -> Result<()> {
                 println!("Estimated time: {}ms", status.estimated_time_ms);
 
                 if parallel {
-                    println!(
-                        "Parallel processing would be enabled with {} workers",
-                        max_workers
-                    );
+                    println!("Parallel processing would be enabled with {max_workers} workers");
                 }
             }
             Err(e) => {
-                println!("Could not determine status due to error: {}", e);
+                println!("Could not determine status due to error: {e}");
                 println!("This might be due to repository access issues.");
                 println!(
                     "Total sources in configuration: {}",
@@ -132,7 +129,7 @@ pub async fn run(matches: &ArgMatches) -> Result<()> {
                 }
             }
             Err(e) => {
-                println!("Could not determine incremental status: {}", e);
+                println!("Could not determine incremental status: {e}");
                 println!("Falling back to processing all sources");
                 app.config.sources.iter().collect::<Vec<_>>()
             }
@@ -182,11 +179,11 @@ pub async fn run(matches: &ArgMatches) -> Result<()> {
         let total_warnings: usize = results.iter().map(|r| r.warnings.len()).sum();
         let files_generated: usize = results.iter().map(|r| r.files_generated).sum();
 
-        let result = crate::generator::GenerationResult {
+        let result = jsonnet_generator::GenerationResult {
             sources_processed: results.len(),
             total_sources: app.config.sources.len(),
             results: results.clone(),
-            statistics: crate::GenerationStatistics {
+            statistics: jsonnet_generator::result::GenerationStatistics {
                 total_processing_time_ms: results.iter().map(|r| r.processing_time_ms).sum(),
                 sources_processed: results.len(),
                 files_generated,
@@ -252,7 +249,7 @@ async fn process_sources_parallel(
     app: &crate::JsonnetGen,
     sources: &[&crate::config::Source],
     max_workers: usize,
-) -> Result<Vec<crate::generator::SourceResult>> {
+) -> Result<Vec<jsonnet_generator::SourceResult>> {
     let semaphore = Arc::new(Semaphore::new(max_workers));
     let app = Arc::new(app);
 
@@ -266,7 +263,7 @@ async fn process_sources_parallel(
             let source_name = source.name().to_string();
 
             info!("Processing source in parallel: {}", source_name);
-            println!("Processing: {}", source_name);
+            println!("Processing: {source_name}");
 
             match app.process_source_with_recovery(source).await {
                 Ok(result) => {
@@ -282,7 +279,7 @@ async fn process_sources_parallel(
                         "Failed to process source in parallel {}: {}",
                         source_name, e
                     );
-                    println!("Failed: {} - {}", source_name, e);
+                    println!("Failed: {source_name} - {e}");
                     Err(e)
                 }
             }
@@ -310,7 +307,7 @@ async fn process_sources_parallel(
     if !errors.is_empty() {
         println!("{} sources failed to process:", errors.len());
         for error in &errors {
-            eprintln!("  Error: {}", error);
+            eprintln!("  Error: {error}");
         }
     }
 
@@ -318,7 +315,7 @@ async fn process_sources_parallel(
 }
 
 /// Display generation results in a formatted way
-fn display_generation_results(result: &crate::generator::GenerationResult) {
+fn display_generation_results(result: &jsonnet_generator::GenerationResult) {
     println!("Incremental generation completed successfully!");
     println!(
         "Sources processed: {}/{}",

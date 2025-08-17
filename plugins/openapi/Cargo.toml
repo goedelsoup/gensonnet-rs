@@ -1,0 +1,19 @@
+[package]
+name = "gensonnet-plugin-openapi"
+version = "0.1.0"
+edition = "2021"
+description = "OpenAPI processing plugin for gensonnet"
+license = "MIT"
+
+[dependencies]
+gensonnet-plugin = { path = "../../crates/plugin" }
+anyhow = "1.0"
+async-trait = "0.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
+serde_json = "1.0"
+tokio = { version = "1.0", features = ["sync", "fs"] }
+tracing = "0.1"
+
+[dev-dependencies]
+tempfile = "3.0"
