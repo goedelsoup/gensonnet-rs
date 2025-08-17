@@ -75,6 +75,9 @@ jobs:
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
 
+    - name: Install cargo-audit
+      run: cargo install cargo-audit
+
     - name: Run security audit
       run: cargo audit --deny warnings
 
