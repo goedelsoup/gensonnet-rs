@@ -104,7 +104,7 @@ run-with-config config:
 # Create a new release build
 release:
     cargo build --release
-    @echo "Release build complete: target/release/jsonnet-gen"
+    @echo "Release build complete: target/release/gensonnet"
 
 # Run benchmarks (if available)
 bench:

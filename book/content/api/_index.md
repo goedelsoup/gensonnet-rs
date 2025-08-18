@@ -1,12 +1,12 @@
 +++
 title = "API Reference"
-description = "Complete API reference for Gensonnet-rs"
+description = "Complete API reference for Gensonnet"
 weight = 4
 +++
 
 # API Reference
 
-This section provides comprehensive API documentation for Gensonnet-rs.
+This section provides comprehensive API documentation for Gensonnet.
 
 ## Command Line Interface
 
@@ -23,10 +23,10 @@ All commands support the following global options:
 
 #### `init`
 
-Initialize a new Gensonnet-rs project.
+Initialize a new Gensonnet project.
 
 ```bash
-gensonnet-rs init [OPTIONS]
+gensonnet init [OPTIONS]
 ```
 
 **Options:**
@@ -38,7 +38,7 @@ gensonnet-rs init [OPTIONS]
 Generate Jsonnet code from configured sources.
 
 ```bash
-gensonnet-rs generate [OPTIONS]
+gensonnet generate [OPTIONS]
 ```
 
 **Options:**
@@ -51,7 +51,7 @@ gensonnet-rs generate [OPTIONS]
 Validate generated code and configuration.
 
 ```bash
-gensonnet-rs validate [OPTIONS]
+gensonnet validate [OPTIONS]
 ```
 
 **Options:**
@@ -63,7 +63,7 @@ gensonnet-rs validate [OPTIONS]
 Run tests for generated code.
 
 ```bash
-gensonnet-rs test [OPTIONS]
+gensonnet test [OPTIONS]
 ```
 
 **Options:**
@@ -75,7 +75,7 @@ gensonnet-rs test [OPTIONS]
 Manage plugins.
 
 ```bash
-gensonnet-rs plugin <SUBCOMMAND>
+gensonnet plugin <SUBCOMMAND>
 ```
 
 **Subcommands:**
@@ -93,7 +93,7 @@ gensonnet-rs plugin <SUBCOMMAND>
 version: "1.0"
 project:
   name: "my-project"
-  description: "My Gensonnet-rs project"
+  description: "My Gensonnet project"
 
 sources:
   # Source definitions (see below)
@@ -191,7 +191,7 @@ output:
 ```yaml
 plugins:
   registry:
-    url: "https://plugins.gensonnet-rs.com"
+    url: "https://plugins.gensonnet.com"
     auth:
       token: "${PLUGIN_TOKEN}"
   
@@ -316,7 +316,7 @@ All errors include context information to help with debugging:
 
 ## Logging
 
-Gensonnet-rs uses structured logging with the following levels:
+Gensonnet uses structured logging with the following levels:
 
 - **DEBUG**: Detailed debugging information
 - **INFO**: General information about operations

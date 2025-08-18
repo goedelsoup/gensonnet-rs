@@ -462,13 +462,13 @@ The OpenAPI generator creates a well-organized Jsonnet library:
 
 ```bash
 # Validate OpenAPI specification
-gensonnet-rs validate --source openapi
+gensonnet validate --source openapi
 
 # Generate with verbose output
-RUST_LOG=debug gensonnet-rs generate
+RUST_LOG=debug gensonnet generate
 
 # Check generated code
-gensonnet-rs check --output ./generated/openapi
+gensonnet check --output ./generated/openapi
 ```
 
 ## Examples

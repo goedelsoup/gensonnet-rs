@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        config: [default, istio, prometheus]
+        config: [default, opentelemetry, prometheus]
 
     steps:
     - uses: actions/checkout@v4
@@ -39,22 +39,22 @@ jobs:
     - name: Test with default config
       if: matrix.config == 'default'
       run: |
-        ./target/release/jsonnet-gen init --example
-        ./target/release/jsonnet-gen validate
-        ./target/release/jsonnet-gen info
+        ./target/release/gensonnet init --example
+        ./target/release/gensonnet validate
+        ./target/release/gensonnet info
 
-    - name: Test with Istio config
-      if: matrix.config == 'istio'
+    - name: Test with OpenTelemetry Operator config
+      if: matrix.config == 'opentelemetry'
       run: |
-        cp examples/istio-crds.yaml .jsonnet-gen.yaml
-        ./target/release/jsonnet-gen validate
-        ./target/release/jsonnet-gen info
+        cp examples/crds/opentelemetry-operator.yaml .gensonnet.yaml
+        ./target/release/gensonnet validate
+        ./target/release/gensonnet info
 
     - name: Test with Prometheus config
       if: matrix.config == 'prometheus'
       run: |
         # Create a test config for Prometheus
-        cat > .jsonnet-gen.yaml << 'EOF'
+        cat > .gensonnet.yaml << 'EOF'
         version: "1.0"
         sources:
           - type: "crd"
@@ -72,7 +72,7 @@ jobs:
           fail_fast: false
           deep_merge_strategy: "default"
         EOF
-        ./target/release/jsonnet-gen validate
+        ./target/release/gensonnet validate
 
   test-features:
     name: Test Features
@@ -129,12 +129,12 @@ jobs:
     - name: Test CLI commands
       run: |
         cargo build --release
-        ./target/release/jsonnet-gen --help
-        ./target/release/jsonnet-gen init --help
-        ./target/release/jsonnet-gen generate --help
-        ./target/release/jsonnet-gen validate --help
-        ./target/release/jsonnet-gen lock --help
-        ./target/release/jsonnet-gen info --help
+        ./target/release/gensonnet --help
+        ./target/release/gensonnet init --help
+        ./target/release/gensonnet generate --help
+        ./target/release/gensonnet validate --help
+        ./target/release/gensonnet lock --help
+        ./target/release/gensonnet info --help
 
   test-error-handling:
     name: Error Handling Tests
@@ -162,17 +162,17 @@ jobs:
     - name: Test invalid configurations
       run: |
         # Test with non-existent config file
-        ./target/release/jsonnet-gen --config nonexistent.yaml validate || true
+        ./target/release/gensonnet --config nonexistent.yaml validate || true
         
         # Test with invalid YAML
         echo "invalid: yaml: content" > invalid.yaml
-        ./target/release/jsonnet-gen --config invalid.yaml validate || true
+        ./target/release/gensonnet --config invalid.yaml validate || true
         
         # Test with empty config
         echo "" > empty.yaml
-        ./target/release/jsonnet-gen --config empty.yaml validate || true
+        ./target/release/gensonnet --config empty.yaml validate || true
 
     - name: Test lockfile operations
       run: |
         # Test lockfile status when no lockfile exists
-        ./target/release/jsonnet-gen lock --status || true
+        ./target/release/gensonnet lock --status || true

@@ -11,7 +11,7 @@ pub struct CliApp;
 impl CliApp {
     /// Create the CLI application
     pub fn app() -> Command {
-        Command::new("jsonnet-gen")
+        Command::new("gensonnet")
             .version(env!("CARGO_PKG_VERSION"))
             .about("Generate type-safe Jsonnet libraries from schema sources")
             .subcommand_negates_reqs(true)
@@ -61,10 +61,10 @@ pub mod utils {
         } else {
             // Look for default config files
             let default_paths = [
-                PathBuf::from(".jsonnet-gen.yaml"),
-                PathBuf::from(".jsonnet-gen.yml"),
-                PathBuf::from("jsonnet-gen.yaml"),
-                PathBuf::from("jsonnet-gen.yml"),
+                PathBuf::from(".gensonnet.yaml"),
+                PathBuf::from(".gensonnet.yml"),
+                PathBuf::from("gensonnet.yaml"),
+                PathBuf::from("gensonnet.yml"),
             ];
 
             for path in &default_paths {
@@ -73,7 +73,7 @@ pub mod utils {
                 }
             }
 
-            Err(anyhow!("No configuration file found. Use --config to specify a file or create one with 'jsonnet-gen init'"))
+            Err(anyhow!("No configuration file found. Use --config to specify a file or create one with 'gensonnet init'"))
         }
     }
 

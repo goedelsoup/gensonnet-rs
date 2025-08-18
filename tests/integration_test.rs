@@ -1,5 +1,5 @@
-use jsonnet_gen::LockfileManager;
-use jsonnet_gen::{Config, CrdParser};
+use gensonnet::LockfileManager;
+use gensonnet::{Config, CrdParser};
 use std::path::PathBuf;
 use tempfile::TempDir;
 
@@ -42,10 +42,10 @@ spec:
 
     // Create a minimal configuration
     let mut config = Config::default();
-    config.sources.push(jsonnet_gen::config::Source::Crd(
-        jsonnet_gen::config::CrdSource {
+    config.sources.push(gensonnet::config::Source::Crd(
+        gensonnet::config::CrdSource {
             name: "test-crds".to_string(),
-            git: jsonnet_gen::config::GitSource {
+            git: gensonnet::config::GitSource {
                 url: "https://github.com/test/repo.git".to_string(),
                 ref_name: Some("main".to_string()),
                 auth: None,
@@ -89,7 +89,7 @@ fn test_config_serialization() {
 
 #[test]
 fn test_crd_schema_validation() {
-    let schema = jsonnet_gen::CrdSchema {
+    let schema = gensonnet::CrdSchema {
         name: "test".to_string(),
         group: "test.com".to_string(),
         version: "v1".to_string(),
@@ -97,8 +97,8 @@ fn test_crd_schema_validation() {
         kind: "test".to_string(),
         schema: serde_yaml::Value::Null,
         source_path: PathBuf::from("test.yaml"),
-        validation_rules: jsonnet_gen::ValidationRules::default(),
-        schema_analysis: jsonnet_gen::SchemaAnalysis::default(),
+        validation_rules: gensonnet::ValidationRules::default(),
+        schema_analysis: gensonnet::SchemaAnalysis::default(),
     };
 
     assert_eq!(schema.kind(), "test");
@@ -108,7 +108,7 @@ fn test_crd_schema_validation() {
 
 #[tokio::test]
 async fn test_git_manager_creation() {
-    let git_manager = jsonnet_gen::GitManager::new();
+    let git_manager = gensonnet::GitManager::new();
     assert!(git_manager.is_ok());
 }
 

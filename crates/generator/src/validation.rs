@@ -10,7 +10,15 @@ impl ValidationGenerator {
     pub fn new() -> Self {
         Self
     }
+}
 
+impl Default for ValidationGenerator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl ValidationGenerator {
     /// Generate validation functions for a schema
     pub fn generate_validation_functions(&self, schema: &CrdSchema) -> Result<String> {
         let mut content = String::new();

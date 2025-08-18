@@ -19,7 +19,7 @@ pub fn ensure_directory(path: &Path) -> Result<()> {
 pub fn get_config_dir() -> Result<PathBuf> {
     let config_dir = dirs::config_dir()
         .ok_or_else(|| anyhow!("Could not determine config directory"))?
-        .join("jsonnet-gen");
+        .join("gensonnet");
 
     Ok(config_dir)
 }
@@ -28,7 +28,7 @@ pub fn get_config_dir() -> Result<PathBuf> {
 pub fn get_cache_dir() -> Result<PathBuf> {
     let cache_dir = dirs::cache_dir()
         .ok_or_else(|| anyhow!("Could not determine cache directory"))?
-        .join("jsonnet-gen");
+        .join("gensonnet");
 
     Ok(cache_dir)
 }

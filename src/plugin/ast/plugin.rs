@@ -8,6 +8,7 @@ use super::parser::GoAstParser;
 use crate::plugin::*;
 
 /// Go AST plugin
+#[allow(dead_code)]
 pub struct GoAstPlugin {
     /// Parser instance
     parser: GoAstParser,

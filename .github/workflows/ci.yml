@@ -40,6 +40,12 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libssl-dev pkg-config
 
+    - name: Install cargo-fmt
+      run: cargo install cargo-fmt
+
+    - name: Install cargo-clippy
+      run: cargo install cargo-clippy
+
     - name: Check code formatting
       run: cargo fmt --all -- --check
 
@@ -57,8 +63,8 @@ jobs:
 
     - name: Test binary
       run: |
-        ./target/release/jsonnet-gen --version
-        ./target/release/jsonnet-gen info
+        ./target/release/gensonnet --version
+        ./target/release/gensonnet info
 
   security:
     name: Security Audit
@@ -139,12 +145,12 @@ jobs:
 
     - name: Test binary
       run: |
-        ./target/release/jsonnet-gen --version
-        ./target/release/jsonnet-gen info
+        ./target/release/gensonnet --version
+        ./target/release/gensonnet info
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: jsonnet-gen-${{ matrix.os }}
-        path: target/release/jsonnet-gen*
+        name: gensonnet-${{ matrix.os }}
+        path: target/release/gensonnet*
         retention-days: 7

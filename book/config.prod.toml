@@ -1,18 +1,17 @@
-# Production configuration for Gensonnet-rs documentation site
+# Production configuration for Gensonnet documentation site
 # Copy this to config.toml for production builds
 
 base_url = "https://goedelsoup.github.io/gensonnet-rs"
-title = "Gensonnet-rs Documentation"
-description = "Documentation for the Gensonnet-rs project"
+title = "Gensonnet Documentation"
+description = "Documentation for the Gensonnet project"
 default_language = "en"
 
-# Theme configuration
-theme = ""
+# Theme configuration - using custom templates
 
 # Build configuration
 build_search_index = true
-generate_feed = true
-feed_filename = "rss.xml"
+generate_feeds = true
+feed_filenames = ["rss.xml"]
 
 # Markdown configuration
 markdown = { toc = true, external_links_target_blank = true, external_links_no_follow = true }
@@ -23,35 +22,36 @@ taxonomies = [
     { name = "categories", feed = true },
 ]
 
-# Menu configuration
-[menu]
-[[menu.main]]
-name = "Home"
-url = "/"
-weight = 1
-
-[[menu.main]]
-name = "Getting Started"
-url = "/getting-started/"
-weight = 2
-
-[[menu.main]]
-name = "Plugins"
-url = "/plugins/"
-weight = 3
-
-[[menu.main]]
-name = "API Reference"
-url = "/api/"
-weight = 4
-
-[[menu.main]]
-name = "Examples"
-url = "/examples/"
-weight = 5
+# Menu configuration moved to extra section
 
 # Extra configuration
 [extra]
 # Put any custom variables here
 github_url = "https://github.com/goedelsoup/gensonnet-rs"
 environment = "production"
+
+# Menu configuration
+[[extra.menu]]
+name = "Home"
+url = "/"
+weight = 1
+
+[[extra.menu]]
+name = "Getting Started"
+url = "/getting-started/"
+weight = 2
+
+[[extra.menu]]
+name = "Plugins"
+url = "/plugins/"
+weight = 3
+
+[[extra.menu]]
+name = "API Reference"
+url = "/api/"
+weight = 4
+
+[[extra.menu]]
+name = "Examples"
+url = "/examples/"
+weight = 5

@@ -269,6 +269,7 @@ impl CloneableAstVisitor for DefaultAstVisitor {
 }
 
 /// AST visitor builder
+#[allow(dead_code)]
 pub struct AstVisitorBuilder {
     /// Visitor name
     name: String,

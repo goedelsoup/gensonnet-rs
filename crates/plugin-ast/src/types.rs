@@ -1,5 +1,6 @@
 //! AST type definitions and utilities
 
+#[allow(unused_imports)]
 use crate::AstNodeType;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

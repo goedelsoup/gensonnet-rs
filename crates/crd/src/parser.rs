@@ -4,7 +4,7 @@ use crate::schema::CrdSchema;
 use crate::types::{FieldAnalysis, SchemaAnalysis, ValidationRules};
 use anyhow::{anyhow, Result};
 use glob::Pattern;
-use std::path::{Path, PathBuf};
+use std::path::Path; 
 use tracing::{debug, info};
 use walkdir::WalkDir;
 
@@ -245,14 +245,16 @@ impl CrdParser {
 
     /// Analyze schema structure and types
     fn analyze_schema(&self, schema: &serde_yaml::Value) -> Result<SchemaAnalysis> {
-        let mut analysis = SchemaAnalysis::default();
-
-        // Determine schema type
-        analysis.schema_type = schema
+        let schema_type = schema
             .get("type")
             .and_then(|t| t.as_str())
             .unwrap_or("object")
             .to_string();
+        
+        let mut analysis = SchemaAnalysis {
+            schema_type,
+            ..Default::default()
+        };
 
         // Analyze object properties
         if let Some(properties) = schema.get("properties").and_then(|p| p.as_mapping()) {
@@ -292,15 +294,19 @@ impl CrdParser {
 
     /// Analyze a field schema
     fn analyze_field_schema(&self, schema: &serde_yaml::Value) -> Result<FieldAnalysis> {
-        let mut analysis = FieldAnalysis::default();
-
-        analysis.field_type = schema
+        let field_type = schema
             .get("type")
             .and_then(|t| t.as_str())
             .unwrap_or("object")
             .to_string();
 
-        analysis.validation_rules = self.extract_validation_rules(schema)?;
+        let validation_rules = self.extract_validation_rules(schema)?;
+
+        let mut analysis = FieldAnalysis {
+            field_type,
+            validation_rules,
+            ..Default::default()
+        };
 
         // Check for nested objects
         if let Some(properties) = schema.get("properties") {
@@ -357,7 +363,7 @@ mod tests {
             api_version: "test.example.com/v1".to_string(),
             kind: "TestResource".to_string(),
             schema: serde_yaml::Value::Null,
-            source_path: PathBuf::from("test.yaml"),
+            source_path: std::path::PathBuf::from("test.yaml"),
             validation_rules: crate::types::ValidationRules::default(),
             schema_analysis: crate::types::SchemaAnalysis::default(),
         };
@@ -382,7 +388,7 @@ mod tests {
             api_version: "test.example.com/v1".to_string(),
             kind: "TestResource".to_string(),
             schema: serde_yaml::Value::Null,
-            source_path: PathBuf::from("test.yaml"),
+            source_path: std::path::PathBuf::from("test.yaml"),
             validation_rules: crate::types::ValidationRules::default(),
             schema_analysis: crate::types::SchemaAnalysis::default(),
         };

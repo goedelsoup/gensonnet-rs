@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ config.title }}{% endblock title %}</title>
+    <meta name="description" content="{% block description %}{{ config.description }}{% endblock description %}">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ get_url(path="css/main.css") }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ get_url(path="favicon.svg") }}">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{% block og_title %}{{ config.title }}{% endblock og_title %}">
+    <meta property="og:description" content="{% block og_description %}{{ config.description }}{% endblock og_description %}">
+    <meta property="og:url" content="{{ current_url | default(value=config.base_url) }}">
+    <meta property="og:type" content="website">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <nav class="navbar">
+                <div class="navbar-brand">
+                    <a href="{{ config.base_url }}" class="navbar-item">
+                        <strong>{{ config.title }}</strong>
+                    </a>
+                </div>
+                
+                <div class="navbar-menu">
+                    <a href="{{ config.base_url }}/" class="navbar-item">Home</a>
+                    <a href="{{ config.base_url }}/getting-started/" class="navbar-item">Getting Started</a>
+                    <a href="{{ config.base_url }}/plugins/" class="navbar-item">Plugins</a>
+                    <a href="{{ config.base_url }}/api/" class="navbar-item">API Reference</a>
+                    <a href="{{ config.base_url }}/examples/" class="navbar-item">Examples</a>
+                </div>
+                
+                <div class="navbar-end">
+                    <a href="{{ config.extra.github_url }}" class="navbar-item" target="_blank" rel="noopener">
+                        <span class="icon">
+                            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+                                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                            </svg>
+                        </span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-main">
+        <div class="container">
+            {% block content %}{% endblock content %}
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>{{ config.title }}</h3>
+                    <p>{{ config.description }}</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Documentation</h4>
+                    <ul>
+                        <li><a href="{{ config.base_url }}/getting-started/">Getting Started</a></li>
+                        <li><a href="{{ config.base_url }}/plugins/">Plugins</a></li>
+                        <li><a href="{{ config.base_url }}/api/">API Reference</a></li>
+                        <li><a href="{{ config.base_url }}/examples/">Examples</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="{{ config.extra.github_url }}">GitHub</a></li>
+                        <li><a href="{{ config.extra.github_url }}/issues">Issues</a></li>
+                        <li><a href="{{ config.extra.github_url }}/discussions">Discussions</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 {{ config.title }}. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="{{ get_url(path="js/main.js") }}"></script>
+</body>
+</html>

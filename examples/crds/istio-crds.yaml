@@ -4,7 +4,7 @@ sources:
     name: "istio-crds"
     git:
       url: "https://github.com/istio/istio.git"
-      ref: "1.20.0"
+      tag: "1.27.0"
     filters:
       - "networking.istio.io/*"
       - "security.istio.io/*"
@@ -14,7 +14,7 @@ sources:
     name: "prometheus-operator"
     git:
       url: "https://github.com/prometheus-operator/kube-prometheus.git"
-      ref: "v0.13.0"
+      tag: "v0.13.0"
     filters:
       - "monitoring.coreos.com/*"
     output_path: "./generated/prometheus"

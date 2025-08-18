@@ -55,7 +55,7 @@ cargo install --path .
 
 1. **Initialize a configuration file**:
    ```bash
-   jsonnet-gen init --example
+   gensonnet init --example
    ```
 
 ## Documentation
@@ -74,7 +74,7 @@ The documentation site includes:
 just docs-dev  # Start local development server
 ```
 
-2. **Edit the configuration** (`.jsonnet-gen.yaml`):
+2. **Edit the configuration** (`.gensonnet.yaml`):
    ```yaml
    version: "1.0"
    sources:
@@ -98,7 +98,7 @@ just docs-dev  # Start local development server
 
 3. **Generate Jsonnet libraries**:
    ```bash
-   jsonnet-gen generate
+   gensonnet generate
    ```
 
 4. **Use the generated libraries**:
@@ -143,17 +143,17 @@ The plugin system provides:
 Processes Go source code and extracts type information:
 ```bash
 # List available plugins
-jsonnet-gen plugins list
+gensonnet plugins list
 
 # Show plugin information
-jsonnet-gen plugins info go-ast:builtin
+gensonnet plugins info go-ast:builtin
 ```
 
 #### OpenAPI Plugin
 Processes OpenAPI/Swagger specifications and extracts schema information:
 ```bash
 # Show plugin information
-jsonnet-gen plugins info openapi:builtin
+gensonnet plugins info openapi:builtin
 ```
 
 Configuration example:
@@ -188,15 +188,15 @@ Features:
 #### Plugin Management
 ```bash
 # List all plugins
-jsonnet-gen plugins list --detailed
+gensonnet plugins list --detailed
 
 # Enable/disable plugins
-jsonnet-gen plugins enable <plugin-id>
-jsonnet-gen plugins disable <plugin-id>
+gensonnet plugins enable <plugin-id>
+gensonnet plugins disable <plugin-id>
 
 # Install/uninstall plugins
-jsonnet-gen plugins install <source>
-jsonnet-gen plugins uninstall <plugin-id>
+gensonnet plugins install <source>
+gensonnet plugins uninstall <plugin-id>
 ```
 
 ### Creating Custom Plugins
@@ -241,45 +241,45 @@ See the [plugin examples](examples/) for complete working examples.
 
 ```bash
 # Check generation status
-jsonnet-gen status
+gensonnet status
 
 # Perform incremental generation
-jsonnet-gen incremental
+gensonnet incremental
 
 # Force full regeneration
-jsonnet-gen incremental --force
+gensonnet incremental --force
 
 # Parallel processing
-jsonnet-gen incremental --parallel --max-workers 8
+gensonnet incremental --parallel --max-workers 8
 ```
 
 ### Cache Management
 
 ```bash
 # Clean up stale entries (older than 1 week)
-jsonnet-gen cleanup
+gensonnet cleanup
 
 # Clean up entries older than 24 hours
-jsonnet-gen cleanup --max-age 24
+gensonnet cleanup --max-age 24
 
 # Dry run to see what would be cleaned
-jsonnet-gen cleanup --dry-run
+gensonnet cleanup --dry-run
 ```
 
 ### Advanced Generation Options
 
 ```bash
 # Generate with parallel processing
-jsonnet-gen generate --parallel --max-workers 4
+gensonnet generate --parallel --max-workers 4
 
 # Dry run to see what would be generated
-jsonnet-gen generate --dry-run
+gensonnet generate --dry-run
 
 # Force regeneration
-jsonnet-gen generate --force
+gensonnet generate --force
 
 # Fail fast on errors
-jsonnet-gen generate --fail-fast
+gensonnet generate --fail-fast
 ```
 
 ## Configuration
@@ -329,9 +329,9 @@ Supported authentication types:
 Initialize a new configuration file.
 
 ```bash
-jsonnet-gen init                    # Create empty config
-jsonnet-gen init --example          # Create example config
-jsonnet-gen init -o custom.yaml     # Specify output file
+gensonnet init                    # Create empty config
+gensonnet init --example          # Create example config
+gensonnet init -o custom.yaml     # Specify output file
 ```
 
 ### `generate`
@@ -339,11 +339,11 @@ jsonnet-gen init -o custom.yaml     # Specify output file
 Generate Jsonnet libraries from configured sources.
 
 ```bash
-jsonnet-gen generate                # Use default config
-jsonnet-gen generate -c custom.yaml # Use custom config
-jsonnet-gen generate --fail-fast    # Stop on first error
-jsonnet-gen generate --dry-run      # Don't write files
-jsonnet-gen generate -o ./output    # Override output directory
+gensonnet generate                # Use default config
+gensonnet generate -c custom.yaml # Use custom config
+gensonnet generate --fail-fast    # Stop on first error
+gensonnet generate --dry-run      # Don't write files
+gensonnet generate -o ./output    # Override output directory
 ```
 
 ### `incremental`
@@ -351,10 +351,10 @@ jsonnet-gen generate -o ./output    # Override output directory
 Perform incremental generation with advanced features.
 
 ```bash
-jsonnet-gen incremental             # Incremental generation
-jsonnet-gen incremental --force     # Force full regeneration
-jsonnet-gen incremental --parallel  # Parallel processing
-jsonnet-gen incremental --dry-run   # Show what would be generated
+gensonnet incremental             # Incremental generation
+gensonnet incremental --force     # Force full regeneration
+gensonnet incremental --parallel  # Parallel processing
+gensonnet incremental --dry-run   # Show what would be generated
 ```
 
 ### `status`
@@ -362,8 +362,8 @@ jsonnet-gen incremental --dry-run   # Show what would be generated
 Show generation status and incremental generation information.
 
 ```bash
-jsonnet-gen status                  # Basic status
-jsonnet-gen status --detailed       # Detailed information
+gensonnet status                  # Basic status
+gensonnet status --detailed       # Detailed information
 ```
 
 ### `cleanup`
@@ -371,9 +371,9 @@ jsonnet-gen status --detailed       # Detailed information
 Clean up stale entries from lockfile and cache.
 
 ```bash
-jsonnet-gen cleanup                 # Clean up entries older than 1 week
-jsonnet-gen cleanup --max-age 24    # Clean up entries older than 24 hours
-jsonnet-gen cleanup --dry-run       # Show what would be cleaned
+gensonnet cleanup                 # Clean up entries older than 1 week
+gensonnet cleanup --max-age 24    # Clean up entries older than 24 hours
+gensonnet cleanup --dry-run       # Show what would be cleaned
 ```
 
 ### `validate`
@@ -381,8 +381,8 @@ jsonnet-gen cleanup --dry-run       # Show what would be cleaned
 Validate configuration file.
 
 ```bash
-jsonnet-gen validate
-jsonnet-gen validate -c custom.yaml
+gensonnet validate
+gensonnet validate -c custom.yaml
 ```
 
 ### `lock`
@@ -390,8 +390,8 @@ jsonnet-gen validate -c custom.yaml
 Manage lockfile for reproducible builds.
 
 ```bash
-jsonnet-gen lock --status           # Show lockfile status
-jsonnet-gen lock --update           # Update lockfile
+gensonnet lock --status           # Show lockfile status
+gensonnet lock --update           # Update lockfile
 ```
 
 ### `info`
@@ -399,8 +399,8 @@ jsonnet-gen lock --update           # Update lockfile
 Show tool information.
 
 ```bash
-jsonnet-gen info
-jsonnet-gen info --detailed
+gensonnet info
+gensonnet info --detailed
 ```
 
 ## Generated Code Structure

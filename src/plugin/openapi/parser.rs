@@ -159,6 +159,7 @@ impl OpenApiParser {
     }
 
     /// Convert OpenAPI schema to YAML
+    #[allow(clippy::only_used_in_recursion)]
     fn schema_to_yaml(&self, schema: &Schema) -> serde_yaml::Value {
         let mut yaml = serde_yaml::Mapping::new();
 

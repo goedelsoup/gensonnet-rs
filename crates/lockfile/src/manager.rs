@@ -128,7 +128,7 @@ impl LockfileManager {
 
     /// Get the default lockfile path
     pub fn default_path() -> PathBuf {
-        PathBuf::from("jsonnet-gen.lock")
+        PathBuf::from("gensonnet.lock")
     }
 }
 

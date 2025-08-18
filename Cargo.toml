@@ -9,7 +9,7 @@ members = [
 ]
 
 [package]
-name = "jsonnet-gen"
+name = "gensonnet"
 version = "0.1.0"
 edition = "2021"
 authors = ["Jsonnet Generator Team"]
@@ -86,7 +86,7 @@ tempfile = "3.8"
 cargo-audit = "0.21.2"
 
 [[bin]]
-name = "jsonnet-gen"
+name = "gensonnet"
 path = "src/main.rs"
 
 [features]

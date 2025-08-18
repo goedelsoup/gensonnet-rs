@@ -482,13 +482,13 @@ The Go AST generator creates well-organized Jsonnet libraries:
 
 ```bash
 # Validate Go source
-gensonnet-rs validate --source go_ast
+gensonnet validate --source go_ast
 
 # Generate with verbose output
-RUST_LOG=debug gensonnet-rs generate
+RUST_LOG=debug gensonnet generate
 
 # Check generated code
-gensonnet-rs check --output ./generated/go-ast
+gensonnet check --output ./generated/go-ast
 ```
 
 ## Examples

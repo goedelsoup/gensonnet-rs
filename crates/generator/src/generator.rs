@@ -296,6 +296,7 @@ impl JsonnetGenerator {
     }
 
     /// Serialize YAML value to Jsonnet
+    #[allow(clippy::only_used_in_recursion)]
     fn serialize_yaml_to_jsonnet(&self, value: &serde_yaml::Value) -> Result<String> {
         match value {
             serde_yaml::Value::Null => Ok("null".to_string()),

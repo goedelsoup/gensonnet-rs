@@ -183,14 +183,14 @@ impl JsonnetGen {
     }
 
     /// Expand plugin directory path (handle ~ and environment variables)
-    fn expand_plugin_directory(&self, path: &PathBuf) -> Result<PathBuf> {
+    fn expand_plugin_directory(&self, path: &Path) -> Result<PathBuf> {
         let path_str = path.to_string_lossy();
 
-        if path_str.starts_with("~/") {
+        if let Some(stripped) = path_str.strip_prefix("~/") {
             let home = std::env::var("HOME")
                 .or_else(|_| std::env::var("USERPROFILE"))
                 .map_err(|_| anyhow::anyhow!("Could not determine home directory"))?;
-            return Ok(PathBuf::from(home).join(&path_str[2..]));
+            return Ok(PathBuf::from(home).join(stripped));
         }
 
         // Handle environment variables like $XDG_CONFIG_HOME
@@ -200,7 +200,7 @@ impl JsonnetGen {
             return Ok(PathBuf::from(expanded.as_ref()));
         }
 
-        Ok(path.clone())
+        Ok(path.to_path_buf())
     }
 
     /// Generate Jsonnet libraries from all configured sources

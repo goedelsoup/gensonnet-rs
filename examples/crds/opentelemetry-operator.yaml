@@ -1,13 +1,14 @@
+# https://github.com/open-telemetry/opentelemetry-operator/tree/main/bundle/community/manifests
 version: "1.0"
 sources:
-  - type: crd
-    name: "test-crd"
+  - type: "crd"
+    name: "opentelemetry-operator"
     git:
-      url: "https://github.com/test/repo.git"
+      url: "https://github.com/open-telemetry/opentelemetry-operator.git"
       ref: "main"
     filters:
-      - "test.com/v1"
-    output_path: "./test-output"
+      - "opentelemetry.io/*"
+    output_path: "./generated/opentelemetry"
 
 output:
   base_path: "./generated"

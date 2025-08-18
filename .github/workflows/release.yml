@@ -17,16 +17,16 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            artifact_name: jsonnet-gen-linux-x86_64
+            artifact_name: gensonnet-linux-x86_64
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            artifact_name: jsonnet-gen-windows-x86_64.exe
+            artifact_name: gensonnet-windows-x86_64.exe
           - os: macos-latest
             target: x86_64-apple-darwin
-            artifact_name: jsonnet-gen-macos-x86_64
+            artifact_name: gensonnet-macos-x86_64
           - os: macos-latest
             target: aarch64-apple-darwin
-            artifact_name: jsonnet-gen-macos-aarch64
+            artifact_name: gensonnet-macos-aarch64
 
     steps:
     - uses: actions/checkout@v4
@@ -55,9 +55,9 @@ jobs:
       run: |
         cargo build --release --target ${{ matrix.target }}
         if [ "${{ matrix.os }}" = "windows-latest" ]; then
-          cp target/${{ matrix.target }}/release/jsonnet-gen.exe ${{ matrix.artifact_name }}
+          cp target/${{ matrix.target }}/release/gensonnet.exe ${{ matrix.artifact_name }}
         else
-          cp target/${{ matrix.target }}/release/jsonnet-gen ${{ matrix.artifact_name }}
+          cp target/${{ matrix.target }}/release/gensonnet ${{ matrix.artifact_name }}
         fi
 
     - name: Upload build artifacts
@@ -83,10 +83,10 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          jsonnet-gen-linux-x86_64
-          jsonnet-gen-windows-x86_64.exe
-          jsonnet-gen-macos-x86_64
-          jsonnet-gen-macos-aarch64
+          gensonnet-linux-x86_64
+          gensonnet-windows-x86_64.exe
+          gensonnet-macos-x86_64
+          gensonnet-macos-aarch64
         generate_release_notes: true
         draft: false
         prerelease: false

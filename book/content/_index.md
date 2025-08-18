@@ -1,19 +1,17 @@
 +++
-title = "Gensonnet-rs Documentation"
-description = "Documentation for the Gensonnet-rs project"
+title = "Gensonnet Documentation"
+description = "Documentation for the Gensonnet project"
 sort_by = "weight"
 weight = 1
-template = "index.html"
-page_template = "page.html"
 +++
 
-# Welcome to Gensonnet-rs
+# Welcome to Gensonnet
 
-Gensonnet-rs is a powerful tool for generating Jsonnet code from various sources including OpenAPI specifications, Go AST, and Custom Resource Definitions (CRDs).
+Gensonnet is a powerful tool for generating Jsonnet code from various sources including OpenAPI specifications, Go AST, and Custom Resource Definitions (CRDs).
 
-## What is Gensonnet-rs?
+## What is Gensonnet?
 
-Gensonnet-rs is a Rust-based code generator that helps you create Jsonnet code from:
+Gensonnet is a Rust-based code generator that helps you create Jsonnet code from:
 
 - **OpenAPI Specifications**: Generate Jsonnet functions from API schemas
 - **Go AST**: Convert Go structs and types to Jsonnet
@@ -29,14 +27,14 @@ Gensonnet-rs is a Rust-based code generator that helps you create Jsonnet code f
 
 ## Quick Start
 
-1. **Install Gensonnet-rs**
+1. **Install Gensonnet**
    ```bash
-   cargo install gensonnet-rs
+   cargo install gensonnet
    ```
 
 2. **Initialize a Project**
    ```bash
-   gensonnet-rs init
+   gensonnet init
    ```
 
 3. **Configure Your Sources**
@@ -49,12 +47,12 @@ Gensonnet-rs is a Rust-based code generator that helps you create Jsonnet code f
 
 4. **Generate Jsonnet Code**
    ```bash
-   gensonnet-rs generate
+   gensonnet generate
    ```
 
 ## Getting Started
 
-Check out our [Getting Started Guide](/getting-started/) to learn how to set up your first Gensonnet-rs project.
+Check out our [Getting Started Guide](/getting-started/) to learn how to set up your first Gensonnet project.
 
 ## Plugins
 

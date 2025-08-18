@@ -26,7 +26,7 @@ impl GitManager {
     fn get_cache_dir() -> Result<PathBuf> {
         let cache_dir = dirs::cache_dir()
             .ok_or_else(|| anyhow!("Could not determine cache directory"))?
-            .join("jsonnet-gen")
+            .join("gensonnet")
             .join("git");
 
         Ok(cache_dir)
@@ -214,7 +214,7 @@ mod tests {
         };
 
         let path = manager.get_repo_path(&git_source);
-        assert!(path.to_string_lossy().contains("jsonnet-gen"));
+        assert!(path.to_string_lossy().contains("gensonnet"));
         assert!(path.to_string_lossy().contains("git"));
     }
 }

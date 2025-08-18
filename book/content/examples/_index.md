@@ -1,12 +1,12 @@
 +++
 title = "Examples"
-description = "Real-world examples and usage patterns for Gensonnet-rs"
+description = "Real-world examples and usage patterns for Gensonnet"
 weight = 5
 +++
 
 # Examples
 
-This section provides real-world examples and usage patterns for Gensonnet-rs.
+This section provides real-world examples and usage patterns for Gensonnet.
 
 ## Basic Examples
 
@@ -402,7 +402,7 @@ sources:
 
 ### CI/CD Pipeline
 
-Integrate Gensonnet-rs into a CI/CD pipeline.
+Integrate Gensonnet into a CI/CD pipeline.
 
 **GitHub Actions:**
 ```yaml
@@ -425,14 +425,14 @@ jobs:
         with:
           toolchain: stable
       
-      - name: Install Gensonnet-rs
-        run: cargo install gensonnet-rs
+      - name: Install Gensonnet
+        run: cargo install gensonnet
       
       - name: Generate Jsonnet
-        run: gensonnet-rs generate
+        run: gensonnet generate
       
       - name: Validate Generated Code
-        run: gensonnet-rs validate
+        run: gensonnet validate
       
       - name: Commit Changes
         run: |
@@ -445,7 +445,7 @@ jobs:
 
 ### Kubernetes Operator
 
-Use Gensonnet-rs in a Kubernetes operator.
+Use Gensonnet in a Kubernetes operator.
 
 **Operator Configuration:**
 ```yaml

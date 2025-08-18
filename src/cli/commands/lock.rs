@@ -71,10 +71,10 @@ fn load_config() -> Result<crate::Config> {
     // Look for default config files
     let default_paths = [
         PathBuf::from("test-config.yaml"),
-        PathBuf::from(".jsonnet-gen.yaml"),
-        PathBuf::from(".jsonnet-gen.yml"),
-        PathBuf::from("jsonnet-gen.yaml"),
-        PathBuf::from("jsonnet-gen.yml"),
+        PathBuf::from(".gensonnet.yaml"),
+        PathBuf::from(".gensonnet.yml"),
+        PathBuf::from("gensonnet.yaml"),
+        PathBuf::from("gensonnet.yml"),
     ];
 
     for path in &default_paths {

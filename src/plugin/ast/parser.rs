@@ -9,6 +9,7 @@ use super::types::*;
 use crate::plugin::*;
 
 /// Go AST parser using tree-sitter
+#[allow(dead_code)]
 pub struct GoAstParser {
     /// Tree-sitter parser
     parser: Parser,
@@ -760,9 +761,9 @@ impl GoAstParser {
         for (line_num, line) in lines.iter().enumerate() {
             let trimmed = line.trim();
 
-            if trimmed.starts_with("//") {
+            if let Some(stripped) = trimmed.strip_prefix("//") {
                 let comment = CommentNode {
-                    text: trimmed[2..].trim().to_string(),
+                    text: stripped.trim().to_string(),
                     comment_type: CommentType::Line,
                     position: Position {
                         file: file_path.to_path_buf(),

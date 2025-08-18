@@ -1,4 +1,4 @@
-use jsonnet_gen::{Config, JsonnetGen};
+use gensonnet::{Config, JsonnetGen};
 use std::path::PathBuf;
 use tempfile::TempDir;
 
@@ -42,10 +42,10 @@ config:
     config.plugins.enable_external_discovery = true;
 
     // Add a dummy source to satisfy validation
-    config.sources.push(jsonnet_gen::config::Source::Crd(
-        jsonnet_gen::config::CrdSource {
+    config.sources.push(gensonnet::config::Source::Crd(
+        gensonnet::config::CrdSource {
             name: "test".to_string(),
-            git: jsonnet_gen::config::GitSource {
+            git: gensonnet::config::GitSource {
                 url: "https://github.com/test/repo.git".to_string(),
                 ref_name: Some("main".to_string()),
                 auth: None,
@@ -91,10 +91,10 @@ async fn test_plugin_discovery_disabled() {
     config.plugins.enable_external_discovery = false;
 
     // Add a dummy source to satisfy validation
-    config.sources.push(jsonnet_gen::config::Source::Crd(
-        jsonnet_gen::config::CrdSource {
+    config.sources.push(gensonnet::config::Source::Crd(
+        gensonnet::config::CrdSource {
             name: "test".to_string(),
-            git: jsonnet_gen::config::GitSource {
+            git: gensonnet::config::GitSource {
                 url: "https://github.com/test/repo.git".to_string(),
                 ref_name: Some("main".to_string()),
                 auth: None,
@@ -135,10 +135,10 @@ async fn test_plugin_directory_expansion() {
     config.plugins.enable_external_discovery = true;
 
     // Add a dummy source to satisfy validation
-    config.sources.push(jsonnet_gen::config::Source::Crd(
-        jsonnet_gen::config::CrdSource {
+    config.sources.push(gensonnet::config::Source::Crd(
+        gensonnet::config::CrdSource {
             name: "test".to_string(),
-            git: jsonnet_gen::config::GitSource {
+            git: gensonnet::config::GitSource {
                 url: "https://github.com/test/repo.git".to_string(),
                 ref_name: Some("main".to_string()),
                 auth: None,

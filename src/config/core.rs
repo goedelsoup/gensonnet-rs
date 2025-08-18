@@ -66,8 +66,10 @@ impl Config {
         Ok(())
     }
 
-    /// Create a default configuration
-    pub fn default() -> Self {
+}
+
+impl Default for Config {
+    fn default() -> Self {
         Self {
             version: "1.0".to_string(),
             sources: Vec::new(),

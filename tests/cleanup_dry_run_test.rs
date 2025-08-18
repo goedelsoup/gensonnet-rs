@@ -1,14 +1,14 @@
-use jsonnet_gen::{Config, JsonnetGen};
+use gensonnet::{Config, JsonnetGen};
 use std::path::PathBuf;
 
 #[tokio::test]
 async fn test_cleanup_dry_run_functionality() {
     // Create a configuration
     let mut config = Config::default();
-    config.sources.push(jsonnet_gen::config::Source::Crd(
-        jsonnet_gen::config::CrdSource {
+    config.sources.push(gensonnet::config::Source::Crd(
+        gensonnet::config::CrdSource {
             name: "test-crd".to_string(),
-            git: jsonnet_gen::config::GitSource {
+            git: gensonnet::config::GitSource {
                 url: "https://github.com/test/repo.git".to_string(),
                 ref_name: Some("main".to_string()),
                 auth: None,
@@ -31,17 +31,17 @@ async fn test_cleanup_dry_run_functionality() {
     assert_eq!(result.total_size_freed, 0); // Should be 0 for a new lockfile
     assert!(result.stale_sources.is_empty());
     assert!(result.stale_files.is_empty());
-    assert_eq!(result.lockfile_path, PathBuf::from("jsonnet-gen.lock"));
+    assert_eq!(result.lockfile_path, PathBuf::from("gensonnet.lock"));
 }
 
 #[tokio::test]
 async fn test_cleanup_dry_run_with_different_ages() {
     // Create a configuration
     let mut config = Config::default();
-    config.sources.push(jsonnet_gen::config::Source::Crd(
-        jsonnet_gen::config::CrdSource {
+    config.sources.push(gensonnet::config::Source::Crd(
+        gensonnet::config::CrdSource {
             name: "test-crd".to_string(),
-            git: jsonnet_gen::config::GitSource {
+            git: gensonnet::config::GitSource {
                 url: "https://github.com/test/repo.git".to_string(),
                 ref_name: Some("main".to_string()),
                 auth: None,
@@ -73,10 +73,10 @@ async fn test_cleanup_dry_run_with_different_ages() {
 async fn test_cleanup_dry_run_result_structure() {
     // Create a configuration
     let mut config = Config::default();
-    config.sources.push(jsonnet_gen::config::Source::Crd(
-        jsonnet_gen::config::CrdSource {
+    config.sources.push(gensonnet::config::Source::Crd(
+        gensonnet::config::CrdSource {
             name: "test-crd".to_string(),
-            git: jsonnet_gen::config::GitSource {
+            git: gensonnet::config::GitSource {
                 url: "https://github.com/test/repo.git".to_string(),
                 ref_name: Some("main".to_string()),
                 auth: None,
@@ -98,5 +98,5 @@ async fn test_cleanup_dry_run_result_structure() {
     assert_eq!(result.stale_files.len(), result.total_files_removed);
 
     // Verify lockfile path
-    assert_eq!(result.lockfile_path, PathBuf::from("jsonnet-gen.lock"));
+    assert_eq!(result.lockfile_path, PathBuf::from("gensonnet.lock"));
 }

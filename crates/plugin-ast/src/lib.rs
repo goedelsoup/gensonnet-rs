@@ -8,6 +8,7 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+#[allow(unused_imports)]
 use tracing::{debug, info, warn};
 
 use gensonnet_plugin::*;
@@ -443,7 +444,6 @@ impl PluginFactory for AbstractAstPluginFactory {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tempfile::TempDir;
 
     #[test]
     fn test_ast_node_creation() {

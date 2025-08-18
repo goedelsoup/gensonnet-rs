@@ -4,7 +4,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use tempfile::TempDir;
 
@@ -797,7 +797,7 @@ impl PluginTestRunner {
     async fn test_error_scenario(
         &self,
         scenario_name: &str,
-        file_path: &PathBuf,
+        file_path: &Path,
         context: &PluginContext,
         plugin_manager: &Arc<PluginManager>,
     ) -> Result<bool> {

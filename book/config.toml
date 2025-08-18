@@ -1,57 +1,97 @@
-# Development configuration for Gensonnet-rs documentation site
+# Development configuration for Gensonnet documentation site
 # Copy this to config.toml for local development
 
 base_url = "http://127.0.0.1:1111"
-title = "Gensonnet-rs Documentation (Development)"
-description = "Documentation for the Gensonnet-rs project - Development Version"
+title = "Gensonnet Documentation"
+description = "Documentation for the Gensonnet project - A powerful tool for generating type-safe Jsonnet libraries from schema sources"
 default_language = "en"
 
 # Theme configuration
-theme = ""
+theme = "abridge"
 
 # Build configuration
+compile_sass = true
+minify_html = false
 build_search_index = true
-generate_feed = true
-feed_filename = "rss.xml"
-
-# Markdown configuration
-markdown = { toc = true, external_links_target_blank = true, external_links_no_follow = true }
-
-# Taxonomies
+generate_feeds = true
 taxonomies = [
     { name = "tags", feed = true },
-    { name = "categories", feed = true },
 ]
 
-# Menu configuration
-[menu]
-[[menu.main]]
-name = "Home"
-url = "/"
-weight = 1
+# Search configuration
+[search]
+index_format = "elasticlunr_json"
+include_title = true
+include_description = true
+include_content = true
 
-[[menu.main]]
-name = "Getting Started"
-url = "/getting-started/"
-weight = 2
-
-[[menu.main]]
-name = "Plugins"
-url = "/plugins/"
-weight = 3
-
-[[menu.main]]
-name = "API Reference"
-url = "/api/"
-weight = 4
-
-[[menu.main]]
-name = "Examples"
-url = "/examples/"
-weight = 5
+# Markdown configuration
+[markdown]
+highlight_code = true
+highlight_theme = "css"
+bottom_footnotes = true
+render_emoji = false
+external_links_target_blank = true
+external_links_no_follow = false
+external_links_no_referrer = false
+smart_punctuation = false
 
 # Extra configuration
 [extra]
-# Put any custom variables here
+# Layout & Format
+menu = [
+    {url = "getting-started", name = "Getting Started", slash = true, blank = false, size="s110"},
+    {url = "plugins", name = "Plugins", slash = true, blank = false, size="s110"},
+    {url = "api", name = "API Reference", slash = true, blank = false, size="s110"},
+    {url = "examples", name = "Examples", slash = true, blank = false, size="s110"},
+]
+
+menu_footer = [
+    {url = "getting-started", name = "Getting Started", slash = true, blank = false, size="s90"},
+    {url = "plugins", name = "Plugins", slash = true, blank = false, size="s90"},
+    {url = "api", name = "API Reference", slash = true, blank = false, size="s90"},
+    {url = "examples", name = "Examples", slash = true, blank = false, size="s90"},
+]
+
+# Layout options
+toc = true
+recent = true
+recent_items = 15
+series = true
+series_items = 9
+
+# Meta configuration
+meta_index = { position="bottom", size="s90", author=false, readtime=false, readstring="min", date=true, updated=false, categories_tags=true, divider="" }
+meta_post = { position="top", size="s95", author=true, readtime=false, readstring="min read", date=true, updated=true, categories_tags=true, divider="" }
+
+hide_section_dates = false
+hide_page_nextprev_titles = false
+title_size_index = "s85"
+footer_size = "s80"
+footer_credit = true
+
+# Logo configuration
+textlogo = '<font color="#3b82f6">Gen</font>sonnet'
+
+# Site description
+sitedesc = true
+headhr = false
+foothr = false
+
+# SEO and meta
+title_separator = "|"
+title_addition = "Documentation"
+author = "Gensonnet Team"
+keywords = "Gensonnet, Jsonnet, Code Generation, Kubernetes, CRD, OpenAPI, Documentation"
+banner = "banner.png"
+twitter_meta = "goedelsoup"
+seo = true
+
+# Social links
+feed = true
+github = "goedelsoup"
+mail = "contact@example.com"
+
+# Custom variables
 github_url = "https://github.com/goedelsoup/gensonnet-rs"
 environment = "development"

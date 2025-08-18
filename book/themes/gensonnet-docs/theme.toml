@@ -1,0 +1,9 @@
+name = "Gensonnet Docs"
+description = "A modern documentation theme for technical projects"
+license = "MIT"
+homepage = "https://github.com/goedelsoup/gensonnet-rs"
+min_version = "0.4.1"
+
+[author]
+name = "Gensonnet Team"
+homepage = "https://github.com/goedelsoup/gensonnet-rs"

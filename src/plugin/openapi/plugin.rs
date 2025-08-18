@@ -8,6 +8,7 @@ use super::parser::OpenApiParser;
 use crate::plugin::*;
 
 /// OpenAPI plugin
+#[allow(dead_code)]
 pub struct OpenApiPlugin {
     /// Parser instance
     parser: OpenApiParser,

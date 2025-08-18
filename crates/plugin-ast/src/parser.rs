@@ -3,6 +3,7 @@
 use anyhow::Result;
 use async_trait::async_trait;
 use std::path::Path;
+#[allow(unused_imports)]
 use tracing::{debug, warn};
 
 use super::*;
@@ -86,12 +87,14 @@ impl AstParser for DefaultAstParser {
         self.parse_source(&content, Some(file_path)).await
     }
 
-    async fn parse_source(&self, source: &str, file_path: Option<&Path>) -> Result<AstParseResult> {
+    async fn parse_source(&self, source: &str, _file_path: Option<&Path>) -> Result<AstParseResult> {
         let start_time = std::time::Instant::now();
 
         // Simple line-based parsing for default implementation
         let mut root_nodes = Vec::new();
+        #[allow(unused_mut, unused_variables)]
         let mut errors = Vec::new();
+        #[allow(unused_mut, unused_variables)]
         let mut warnings = Vec::new();
         let mut nodes_parsed = 0;
         let mut functions_found = 0;

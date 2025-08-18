@@ -15,7 +15,7 @@ pub fn command() -> Command {
                 .long("output")
                 .help("Output file path")
                 .value_name("FILE")
-                .default_value(".jsonnet-gen.yaml"),
+                .default_value(".gensonnet.yaml"),
         )
         .arg(
             clap::Arg::new("example")

@@ -1,6 +1,6 @@
 +++
 title = "External Plugin System"
-description = "Learn how to create and use external plugins to extend Gensonnet-rs functionality"
+description = "Learn how to create and use external plugins to extend Gensonnet functionality"
 weight = 10
 +++
 
@@ -215,7 +215,7 @@ impl Validator for MyCustomPlugin {
 cargo build --release
 
 # Install the plugin
-gensonnet-rs plugin install ./target/release/my_custom_plugin
+gensonnet plugin install ./target/release/my_custom_plugin
 ```
 
 ## Using External Plugins
@@ -247,13 +247,13 @@ plugins:
 
 ```bash
 # Generate using the plugin
-gensonnet-rs generate
+gensonnet generate
 
 # Validate with the plugin
-gensonnet-rs validate
+gensonnet validate
 
 # Check plugin status
-gensonnet-rs plugin list
+gensonnet plugin list
 ```
 
 ## Plugin Development Best Practices
@@ -307,16 +307,16 @@ plugins:
 
 ```bash
 # List available plugins
-gensonnet-rs plugin list --registry
+gensonnet plugin list --registry
 
 # Install from registry
-gensonnet-rs plugin install my-custom-plugin
+gensonnet plugin install my-custom-plugin
 
 # Update plugins
-gensonnet-rs plugin update
+gensonnet plugin update
 
 # Search plugins
-gensonnet-rs plugin search "custom format"
+gensonnet plugin search "custom format"
 ```
 
 ## Security Considerations
@@ -354,13 +354,13 @@ plugins:
 
 ```bash
 # Enable debug logging
-RUST_LOG=debug gensonnet-rs generate
+RUST_LOG=debug gensonnet generate
 
 # Check plugin status
-gensonnet-rs plugin status
+gensonnet plugin status
 
 # Validate plugin configuration
-gensonnet-rs plugin validate my-custom-plugin
+gensonnet plugin validate my-custom-plugin
 ```
 
 ## Examples

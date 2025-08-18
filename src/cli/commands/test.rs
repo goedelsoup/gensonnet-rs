@@ -588,17 +588,15 @@ async fn discover_test_suite_files() -> Result<Vec<TestSuiteInfo>> {
 
     for pattern in patterns {
         if let Ok(entries) = glob::glob(pattern) {
-            for entry in entries {
-                if let Ok(path) = entry {
-                    if let Ok(test_suite) = load_test_suite_from_file(&path).await {
-                        suites.push(TestSuiteInfo {
-                            name: test_suite.name.clone(),
-                            description: test_suite.description.clone(),
-                            source_type: "File".to_string(),
-                            file_path: Some(path),
-                            test_cases_count: test_suite.test_cases.len(),
-                        });
-                    }
+            for path in entries.flatten() {
+                if let Ok(test_suite) = load_test_suite_from_file(&path).await {
+                    suites.push(TestSuiteInfo {
+                        name: test_suite.name.clone(),
+                        description: test_suite.description.clone(),
+                        source_type: "File".to_string(),
+                        file_path: Some(path),
+                        test_cases_count: test_suite.test_cases.len(),
+                    });
                 }
             }
         }
@@ -620,21 +618,19 @@ async fn discover_plugin_test_suites() -> Result<Vec<TestSuiteInfo>> {
     for plugin_dir in plugin_dirs {
         if plugin_dir.exists() {
             if let Ok(entries) = std::fs::read_dir(plugin_dir) {
-                for entry in entries {
-                    if let Ok(entry) = entry {
-                        let test_suite_path = entry.path().join("test-suite.yaml");
-                        if test_suite_path.exists() {
-                            if let Ok(test_suite) =
-                                load_test_suite_from_file(&test_suite_path).await
-                            {
-                                suites.push(TestSuiteInfo {
-                                    name: test_suite.name.clone(),
-                                    description: test_suite.description.clone(),
-                                    source_type: "Plugin".to_string(),
-                                    file_path: Some(test_suite_path),
-                                    test_cases_count: test_suite.test_cases.len(),
-                                });
-                            }
+                for entry in entries.flatten() {
+                    let test_suite_path = entry.path().join("test-suite.yaml");
+                    if test_suite_path.exists() {
+                        if let Ok(test_suite) =
+                            load_test_suite_from_file(&test_suite_path).await
+                        {
+                            suites.push(TestSuiteInfo {
+                                name: test_suite.name.clone(),
+                                description: test_suite.description.clone(),
+                                source_type: "Plugin".to_string(),
+                                file_path: Some(test_suite_path),
+                                test_cases_count: test_suite.test_cases.len(),
+                            });
                         }
                     }
                 }

@@ -1,18 +1,18 @@
 +++
 title = "Getting Started"
-description = "Learn how to get started with Gensonnet-rs"
+description = "Learn how to get started with Gensonnet"
 weight = 2
 +++
 
-# Getting Started with Gensonnet-rs
+# Getting Started with Gensonnet
 
-This guide will walk you through setting up your first Gensonnet-rs project and generating your first Jsonnet code.
+This guide will walk you through setting up your first Gensonnet project and generating your first Jsonnet code.
 
 ## Prerequisites
 
 Before you begin, make sure you have the following installed:
 
-- **Rust**: Gensonnet-rs is written in Rust and requires Rust 1.70 or later
+- **Rust**: Gensonnet is written in Rust and requires Rust 1.70 or later
 - **Cargo**: Rust's package manager (comes with Rust)
 - **Git**: For version control (optional but recommended)
 
@@ -34,7 +34,7 @@ Before you begin, make sure you have the following installed:
 ### From Cargo
 
 ```bash
-cargo install gensonnet-rs
+cargo install gensonnet
 ```
 
 ## Your First Project
@@ -46,7 +46,7 @@ Create a new directory for your project and initialize it:
 ```bash
 mkdir my-gensonnet-project
 cd my-gensonnet-project
-gensonnet-rs init
+gensonnet init
 ```
 
 This will create a basic project structure with a configuration file.
@@ -79,7 +79,7 @@ sources:
 Run the generator to create your Jsonnet code:
 
 ```bash
-gensonnet-rs generate
+gensonnet generate
 ```
 
 This will process your sources and generate the specified output files.
@@ -103,7 +103,7 @@ local crds = import "generated/crds.jsonnet";
 
 ### Source Types
 
-Gensonnet-rs supports several source types:
+Gensonnet supports several source types:
 
 - **OpenAPI**: Generate from OpenAPI/Swagger specifications
 - **CRD**: Generate from Kubernetes Custom Resource Definitions
@@ -120,6 +120,6 @@ For more advanced configuration options, see the [Configuration Reference](/api/
 
 ## Next Steps
 
-- Explore the [Plugin System](/plugins/) to understand how to extend Gensonnet-rs
+- Explore the [Plugin System](/plugins/) to understand how to extend Gensonnet
 - Check out [Examples](/examples/) for real-world usage patterns
 - Read the [API Reference](/api/) for detailed documentation

@@ -2,7 +2,7 @@
 
 use anyhow::Result;
 
-use jsonnet_gen::cli::CliApp;
+use gensonnet::cli::CliApp;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -10,7 +10,7 @@ async fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "jsonnet_gen=info".into()),
+                .unwrap_or_else(|_| "gensonnet=info".into()),
         )
         .init();
 

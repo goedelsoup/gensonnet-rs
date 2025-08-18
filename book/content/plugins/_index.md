@@ -1,12 +1,12 @@
 +++
 title = "Plugins"
-description = "Learn about Gensonnet-rs plugins and how to create custom ones"
+description = "Learn about Gensonnet plugins and how to create custom ones"
 weight = 3
 +++
 
 # Plugins
 
-Gensonnet-rs uses a plugin architecture to support different input sources and output formats. This page describes the available plugins and how to create custom ones.
+Gensonnet uses a plugin architecture to support different input sources and output formats. This page describes the available plugins and how to create custom ones.
 
 ## Built-in Plugins
 
@@ -128,7 +128,7 @@ Create a `plugin-manifest.yaml` file to describe your plugin:
 ```yaml
 name: "my-custom-plugin"
 version: "1.0.0"
-description: "A custom plugin for Gensonnet-rs"
+description: "A custom plugin for Gensonnet"
 author: "Your Name"
 license: "MIT"
 
@@ -156,7 +156,7 @@ entry_point: "my_custom_plugin"
 
 2. **Install the plugin:**
    ```bash
-   gensonnet-rs plugin install ./target/release/my_custom_plugin
+   gensonnet plugin install ./target/release/my_custom_plugin
    ```
 
 3. **Use in configuration:**
@@ -200,17 +200,17 @@ The plugin registry allows you to discover and install plugins from external sou
 
 **List available plugins:**
 ```bash
-gensonnet-rs plugin list
+gensonnet plugin list
 ```
 
 **Install from registry:**
 ```bash
-gensonnet-rs plugin install my-custom-plugin
+gensonnet plugin install my-custom-plugin
 ```
 
 **Update plugins:**
 ```bash
-gensonnet-rs plugin update
+gensonnet plugin update
 ```
 
 ## External Plugin Development

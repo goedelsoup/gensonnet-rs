@@ -1,6 +1,6 @@
 use anyhow::Result;
-use jsonnet_gen::plugin::crd::{CrdPlugin, CrdPluginFactory};
-use jsonnet_gen::plugin::*;
+use gensonnet::plugin::crd::{CrdPlugin, CrdPluginFactory};
+use gensonnet::plugin::*;
 use std::path::PathBuf;
 use tempfile::TempDir;
 
